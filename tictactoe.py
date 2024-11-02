@@ -2,6 +2,17 @@ import random
 import json
 from typing import Optional
 
+WIN_CONDITIONS = [
+    [0, 1, 2],  # Horizontal
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],  # Vertical
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],  # Diagonal
+    [2, 4, 6],
+]
+
 
 class TicTacToe:
     """Tic-Tac-Toe game environment."""
@@ -20,17 +31,7 @@ class TicTacToe:
         self.current_player = "O" if self.current_player == "X" else "X"
 
     def is_winner(self, player: str) -> bool:
-        win_conditions = [
-            [0, 1, 2],
-            [3, 4, 5],
-            [6, 7, 8],
-            [0, 3, 6],
-            [1, 4, 7],
-            [2, 5, 8],
-            [0, 4, 8],
-            [2, 4, 6],
-        ]
-        return any(all(self.board[i] == player for i in condition) for condition in win_conditions)
+        return any(all(self.board[i] == player for i in condition) for condition in WIN_CONDITIONS)
 
     def is_draw(self) -> bool:
         return " " not in self.board
@@ -148,13 +149,18 @@ def play_game(agent1, agent2):
 def main():
     agent1 = LearningAgent()
     agent2 = LearningAgent()
-    num_episodes = 100_000
+    num_episodes = 1_000_000
+
+    results = {"X": 0, "O": 0, "draw": 0}
 
     for _ in range(num_episodes):
         if random.random() < 0.5:
-            play_game(agent1, agent2)
+            result = play_game(agent1, agent2)
         else:
-            play_game(agent2, agent1)
+            result = play_game(agent2, agent1)
+        results[result] += 1
+
+    print(f"Results: {results}")
 
     agent1.save_policy("agent1.json")
     agent2.save_policy("agent2.json")
