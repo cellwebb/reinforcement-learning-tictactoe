@@ -159,7 +159,8 @@ class TestGameplay(unittest.TestCase):
     def test_play_against_ai(self, mock_input):
         """Test that the game is played to completion against the AI agent."""
         ai_agent = LearningAgent(epsilon=0)
-        play_against_ai(ai_agent, human_plays_first=True)
+        result = play_against_ai(ai_agent, human_plays_first=True)
+        self.assertIn(result, ["X", "O", "draw"])
 
 
 if __name__ == "__main__":
