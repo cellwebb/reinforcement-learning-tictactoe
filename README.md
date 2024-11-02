@@ -11,7 +11,7 @@ A Python implementation of a Tic-Tac-Toe AI that learns optimal play through Q-l
 
 ## Requirements
 
-- Python 3.9+
+- Python 3.10+
 - numpy
 
 ## Installation
@@ -21,7 +21,7 @@ git clone https://github.com/yourusername/reinforcement-learning-tictactoe.git
 cd reinforcement-learning-tictactoe
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 ## Usage
@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ### Training the AI
 
 ```bash
-python tictactoe.py
+python3 tictactoe.py
 ```
 
 This will train two agents through self-play for 1,000,000 episodes and save their policies to agent1.json and agent2.json.
@@ -99,5 +99,5 @@ TODO: Add chart of win results over n training games.
 ### Running Tests
 
 ```bash
-python -m unittest test_tictactoe.py
+python3 -m unittest test_tictactoe.py
 ```
