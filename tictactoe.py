@@ -24,7 +24,7 @@ class TicTacToe:
     def get_available_moves(self) -> list[int]:
         return [i for i, mark in enumerate(self.board) if mark == " "]
 
-    def make_move(self, position: int):
+    def make_move(self, position: int) -> None:
         if self.board[position] != " ":
             raise ValueError("Invalid move")
         self.board[position] = self.current_player
@@ -118,7 +118,7 @@ class LearningAgent:
 
 
 class HumanPlayer:
-    def choose_action(self, state, available_moves):
+    def choose_action(self, state, available_moves) -> int:
         """Get move from human player via console input."""
         # Display the current board
         self.display_board(state)
