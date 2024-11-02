@@ -1,6 +1,12 @@
 import unittest
 from unittest.mock import patch
-from tictactoe import TicTacToe, LearningAgent, HumanPlayer, play_game, play_against_ai
+from reinforcement_learning_tictactoe import (
+    TicTacToe,
+    LearningAgent,
+    HumanPlayer,
+    play_game,
+    play_against_ai,
+)
 import os
 
 
