@@ -198,7 +198,9 @@ def play_against_ai(ai_agent, human_plays_first: bool = True) -> None:
         agents = {"X": ai_agent, "O": human}
 
     print("Game starting! Positions are numbered 0-8, left to right, top to bottom")
-    play_game(agents["X"], agents["O"])
+    result = play_game(agents["X"], agents["O"])
+
+    return result
 
 
 def main():
