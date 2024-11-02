@@ -59,6 +59,8 @@ class LearningAgent:
         else:
             self.q_table = {}
 
+        self.player_type = "agent"
+
     def get_q_value(self, state: tuple[str], action: int) -> float:
         return self.q_table.get((state, action), 0.0)
 
@@ -121,6 +123,9 @@ class LearningAgent:
 class HumanPlayer:
     """Human player for playing Tic-Tac-Toe."""
 
+    def __init__(self):
+        self.player_type = "human"
+
     def choose_action(self, state: tuple[str], available_moves: list[int]) -> int:
         """Get move from human player via console input."""
         self.display_board(state)
@@ -166,22 +171,19 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
         next_state = env.get_state()
 
         if env.is_winner(player):
-            # Only update AI agents
-            if hasattr(players[player], "learn"):
+            if players[player].player_type == "agent":
                 players[player].learn(state, action, 1, next_state, [])
-            if hasattr(players[opponent], "learn"):
+            if players[opponent].player_type == "agent":
                 players[opponent].learn(state, action, -1, next_state, [])
             return player
 
         if env.is_draw():
-            # Only update AI agents
             for p in ["X", "O"]:
-                if hasattr(players[p], "learn"):
+                if players[p].player_type == "agent":
                     players[p].learn(state, action, 0.5, next_state, [])
             return "draw"
 
-        # Only update AI agents
-        if hasattr(players[player], "learn"):
+        if players[player].player_type == "agent":
             players[player].learn(state, action, 0, next_state, env.get_available_moves())
         state = next_state
 
