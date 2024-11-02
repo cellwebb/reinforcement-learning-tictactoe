@@ -1,12 +1,6 @@
 import unittest
 from unittest.mock import patch
-from reinforcement_learning_tictactoe import (
-    TicTacToe,
-    LearningAgent,
-    HumanPlayer,
-    play_game,
-    play_against_ai,
-)
+from tictactoe import TicTacToe, LearningAgent, HumanPlayer, play_game, play_against_ai
 import os
 
 
@@ -165,7 +159,6 @@ class TestGameplay(unittest.TestCase):
     def test_play_against_ai(self, mock_input):
         """Test that the game is played to completion against the AI agent."""
         ai_agent = LearningAgent(epsilon=0)
-        # Test that function runs without errors
         play_against_ai(ai_agent, human_plays_first=True)
 
 
