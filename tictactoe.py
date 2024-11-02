@@ -59,13 +59,13 @@ class LearningAgent:
         else:
             self.q_table = {}
 
-    def get_q_value(self, state, action):
+    def get_q_value(self, state: tuple[str], action: int) -> float:
         return self.q_table.get((state, action), 0.0)
 
-    def update_q_value(self, state, action, value):
+    def update_q_value(self, state: tuple[str], action: int, value: float) -> None:
         self.q_table[(state, action)] = value
 
-    def choose_action(self, state, available_moves):
+    def choose_action(self, state: tuple[str], available_moves: list[int]) -> int:
         if random.random() < self.epsilon:
             return random.choice(available_moves)
         else:
@@ -80,7 +80,7 @@ class LearningAgent:
         reward: float,
         next_state: tuple[str],
         next_available_moves: Optional[list[int]],
-    ):
+    ) -> None:
         old_q = self.get_q_value(state, action)
         if next_available_moves:
             future_rewards = [
@@ -101,7 +101,7 @@ class LearningAgent:
         state = eval(state_str)  # Safe since we control the input format
         return state, int(action)
 
-    def save_policy(self, filename: str):
+    def save_policy(self, filename: str) -> None:
         serialized_q_table = {
             self._serialize_key(state, action): value
             for (state, action), value in self.q_table.items()
@@ -109,7 +109,7 @@ class LearningAgent:
         with open(filename, "w") as f:
             json.dump(serialized_q_table, f)
 
-    def load_policy(self, filename: str):
+    def load_policy(self, filename: str) -> None:
         with open(filename, "r") as f:
             serialized_q_table = json.load(f)
             self.q_table = {
@@ -135,7 +135,7 @@ class HumanPlayer:
             except ValueError:
                 print("Please enter a number between 0-8")
 
-    def display_board(self, state):
+    def display_board(self, state: tuple[str]) -> None:
         """Display the board with numbered positions."""
         board = [" " if x == 0 else x for x in state]
         print("\n")
@@ -147,7 +147,7 @@ class HumanPlayer:
         print("\n")
 
 
-def play_game(agent1, agent2):
+def play_game(agent1: LearningAgent, agent2: LearningAgent) -> str:
     """Play a game of Tic-Tac-Toe between two agents."""
     env = TicTacToe()
     agents = {"X": agent1, "O": agent2}
