@@ -195,15 +195,32 @@ def main():
     num_episodes = 1_000_000
 
     results = {"X": 0, "O": 0, "draw": 0}
+    wins = {"Agent 1": 0, "Agent 2": 0, "draw": 0}
 
     for _ in range(num_episodes):
         if random.random() < 0.5:
             result = play_game(agent1, agent2)
+
+            if result == "X":
+                wins["Agent 1"] += 1
+            elif result == "O":
+                wins["Agent 2"] += 1
+            else:
+                wins["draw"] += 1
         else:
             result = play_game(agent2, agent1)
+
+            if result == "X":
+                wins["Agent 2"] += 1
+            elif result == "O":
+                wins["Agent 1"] += 1
+            else:
+                wins["draw"] += 1
+
         results[result] += 1
 
     print(f"Results: {results}")
+    print(f"Wins: {wins}")
 
     agent1.save_policy("agent1.json")
     agent2.save_policy("agent2.json")
