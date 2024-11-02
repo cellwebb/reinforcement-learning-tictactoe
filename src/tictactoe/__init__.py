@@ -139,7 +139,7 @@ class HumanPlayer:
                     return move
                 print("Invalid move, try again")
             except ValueError:
-                print("Please enter a number between 0-8")
+                print("Please enter an available move")
 
     def display_board(self, state: tuple[str]) -> None:
         """Display the board with numbered positions."""
