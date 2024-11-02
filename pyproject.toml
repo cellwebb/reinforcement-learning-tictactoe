@@ -6,16 +6,13 @@ build-backend = "setuptools.build_meta"
 name = "tictactoe"
 version = "0.1.0"
 description = "A Tic-Tac-Toe AI that learns through Q-learning"
-requires-python = ">=3.10"
-dependencies = [
-    "numpy",
-]
+requires-python = ">=3.11"
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0",
-    "black>=22.0",
-    "isort>=5.0",
+    "pytest>=8.3.3",
+    "black>=24.8.0",
+    "isort>=5.13.2",
 ]
 
 [tool.setuptools.packages.find]
@@ -27,7 +24,7 @@ pythonpath = ["src"]
 
 [tool.black]
 line-length = 100
-target-version = ["py310"]
+target-version = ["py311"]
 
 [tool.isort]
 profile = "black"
