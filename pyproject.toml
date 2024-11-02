@@ -11,6 +11,7 @@ requires-python = ">=3.11"
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3.3",
+    "pytest-cov>=6.0.0",
     "black>=24.8.0",
     "isort>=5.13.2",
 ]
@@ -21,6 +22,23 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+addopts = "--cov"
+
+[tool.coverage.run]
+source = ["src/tictactoe"]
+branch = true
+relative_files = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "pass",
+]
+show_missing = true
+fail_under = 80
 
 [tool.black]
 line-length = 100
