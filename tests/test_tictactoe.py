@@ -188,3 +188,43 @@ def test_agent_learning():
     # Test losing scenario
     agent.learn(state, action, -1.0, next_state, [])
     assert agent.get_q_value(state, action) == -1.0
+
+
+@pytest.mark.parametrize("human_plays_first", [True, False])
+def test_play_against_ai_with_draw(human_plays_first):
+    """Test game ending in a draw."""
+    moves = [0, 4, 8, 2, 6, 3, 5, 1, 7]  # Force a draw
+    with patch("builtins.input", side_effect=moves):
+        ai_agent = LearningAgent(epsilon=0)
+        result = play_against_ai(ai_agent, human_plays_first=human_plays_first)
+        assert result == "draw"
+
+
+def test_main_function():
+    """Test the main training loop."""
+    with patch("random.random", side_effect=[0.4, 0.6] * 50):  # Alternate between agents
+        with patch("tictactoe.play_game") as mock_play:
+            # Simulate alternating wins and draws
+            mock_play.side_effect = ["X", "O", "draw"] * 33334
+
+            # Run main with reduced episodes for testing
+            from tictactoe import main
+
+            main()
+
+
+def test_game_str_representation(game):
+    """Test the string representation of the game board."""
+    game.make_move(0)  # X in position 0
+    game.make_move(4)  # O in position 4
+    expected = " X | |  \n-----\n  |O|  \n-----\n  | |  "
+    assert str(game).replace("\n", "") == expected.replace("\n", "")
+
+
+def test_display_board():
+    """Test the human player's board display."""
+    player = HumanPlayer()
+    state = ("X", "O", " ", " ", "X", " ", "O", " ", " ")
+    with patch("builtins.print") as mock_print:
+        player.display_board(state)
+        mock_print.assert_called()
