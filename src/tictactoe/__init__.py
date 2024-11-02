@@ -175,12 +175,20 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
                 players[player].learn(state, action, 1, next_state, [])
             if players[opponent].player_type == "agent":
                 players[opponent].learn(state, action, -1, next_state, [])
+
+            if players[player].player_type == "human":
+                players[player].display_board(next_state)
+
             return player
 
         if env.is_draw():
             for p in ["X", "O"]:
                 if players[p].player_type == "agent":
                     players[p].learn(state, action, 0.5, next_state, [])
+
+            if players[player].player_type == "human":
+                players[player].display_board(next_state)
+
             return "draw"
 
         if players[player].player_type == "agent":
@@ -200,13 +208,16 @@ def play_against_ai(ai_agent, human_plays_first: bool = True) -> None:
     print("Game starting! Positions are numbered 0-8, left to right, top to bottom")
     result = play_game(agents["X"], agents["O"])
 
+    if (result == "X" and human_plays_first) or (result == "O" and not human_plays_first):
+        print("You win!")
+
     return result
 
 
 def main():
     agent1 = LearningAgent()
     agent2 = LearningAgent()
-    num_episodes = 100_000
+    num_episodes = 10_000_000
 
     results = {"X": 0, "O": 0, "draw": 0}
     wins = {"Agent 1": 0, "Agent 2": 0, "draw": 0}
