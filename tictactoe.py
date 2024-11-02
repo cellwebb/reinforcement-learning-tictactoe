@@ -81,6 +81,7 @@ class LearningAgent:
         next_state: tuple[str],
         next_available_moves: Optional[list[int]],
     ) -> None:
+        """Update Q-value based on reward and learned value."""
         old_q = self.get_q_value(state, action)
         if next_available_moves:
             future_rewards = [
@@ -118,7 +119,7 @@ class LearningAgent:
 
 
 class HumanPlayer:
-    def choose_action(self, state, available_moves) -> int:
+    def choose_action(self, state: tuple[str], available_moves: list[int]) -> int:
         """Get move from human player via console input."""
         self.display_board(state)
 
