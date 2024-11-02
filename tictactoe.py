@@ -117,6 +117,36 @@ class LearningAgent:
             }
 
 
+class HumanPlayer:
+    def choose_action(self, state, available_moves):
+        """Get move from human player via console input."""
+        # Display the current board
+        self.display_board(state)
+
+        # Show available moves
+        print(f"Available moves (0-8): {available_moves}")
+
+        while True:
+            try:
+                move = int(input("Enter your move: "))
+                if move in available_moves:
+                    return move
+                print("Invalid move, try again")
+            except ValueError:
+                print("Please enter a number between 0-8")
+
+    def display_board(self, state):
+        """Display the board with numbered positions."""
+        board = [" " if x == 0 else x for x in state]
+        print("\n")
+        print(f" {board[0]} | {board[1]} | {board[2]} ")
+        print("-----------")
+        print(f" {board[3]} | {board[4]} | {board[5]} ")
+        print("-----------")
+        print(f" {board[6]} | {board[7]} | {board[8]} ")
+        print("\n")
+
+
 def play_game(agent1, agent2):
     """Play a game of Tic-Tac-Toe between two agents."""
     env = TicTacToe()
@@ -144,6 +174,19 @@ def play_game(agent1, agent2):
 
         agents[player].learn(state, action, 0, next_state, env.get_available_moves())
         state = next_state
+
+
+def play_against_ai(ai_agent, human_plays_first=True):
+    """Play a game against the AI agent."""
+    human = HumanPlayer()
+
+    if human_plays_first:
+        agents = {"X": human, "O": ai_agent}
+    else:
+        agents = {"X": ai_agent, "O": human}
+
+    print("Game starting! Positions are numbered 0-8, left to right, top to bottom")
+    play_game(agents["X"], agents["O"])
 
 
 def main():
