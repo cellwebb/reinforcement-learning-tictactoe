@@ -11,8 +11,7 @@ A Python implementation of a Tic-Tac-Toe AI that learns optimal play through Q-l
 
 ## Requirements
 
-- Python 3.10+
-- numpy
+- Python 3.11+
 
 ## Installation
 
