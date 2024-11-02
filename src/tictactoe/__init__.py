@@ -40,8 +40,14 @@ class TicTacToe:
         return tuple(self.board)
 
     def __str__(self):
-        rows = ["|".join(self.board[i : i + 3]) for i in range(0, 9, 3)]
-        return "\n-----\n".join(rows)
+        result = "\n"
+        result += f"\n {self.board[0]} | {self.board[1]} | {self.board[2]} "
+        result += "\n-----------"
+        result += f"\n {self.board[3]} | {self.board[4]} | {self.board[5]} "
+        result += "\n-----------"
+        result += f"\n {self.board[6]} | {self.board[7]} | {self.board[8]} "
+        result += "\n"
+        return result
 
 
 class LearningAgent:
@@ -176,8 +182,8 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
             if players[opponent].player_type == "agent":
                 players[opponent].learn(state, action, -1, next_state, [])
 
-            if players[player].player_type == "human":
-                players[player].display_board(next_state)
+            if "human" in [players["X"].player_type, players["O"].player_type]:
+                print(env)
 
             return player
 
@@ -186,8 +192,8 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
                 if players[p].player_type == "agent":
                     players[p].learn(state, action, 0.5, next_state, [])
 
-            if players[player].player_type == "human":
-                players[player].display_board(next_state)
+            if "human" in [players["X"].player_type, players["O"].player_type]:
+                print(env)
 
             return "draw"
 
@@ -208,8 +214,12 @@ def play_against_ai(ai_agent, human_plays_first: bool = True) -> None:
     print("Game starting! Positions are numbered 0-8, left to right, top to bottom")
     result = play_game(agents["X"], agents["O"])
 
-    if (result == "X" and human_plays_first) or (result == "O" and not human_plays_first):
+    if result == "draw":
+        print("It's a draw!")
+    elif (result == "X" and human_plays_first) or (result == "O" and not human_plays_first):
         print("You win!")
+    else:
+        print("AI wins!")
 
     return result
 
