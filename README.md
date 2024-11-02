@@ -19,6 +19,8 @@ A Python implementation of a Tic-Tac-Toe AI that learns optimal play through Q-l
 ```bash
 git clone https://github.com/yourusername/reinforcement-learning-tictactoe.git
 cd reinforcement-learning-tictactoe
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
