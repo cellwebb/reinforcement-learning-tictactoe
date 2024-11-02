@@ -119,6 +119,8 @@ class LearningAgent:
 
 
 class HumanPlayer:
+    """Human player for playing Tic-Tac-Toe."""
+
     def choose_action(self, state: tuple[str], available_moves: list[int]) -> int:
         """Get move from human player via console input."""
         self.display_board(state)
@@ -146,32 +148,41 @@ class HumanPlayer:
         print("\n")
 
 
-def play_game(agent1: LearningAgent, agent2: LearningAgent) -> str:
-    """Play a game of Tic-Tac-Toe between two agents."""
+def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | HumanPlayer) -> str:
+    """Play a game of Tic-Tac-Toe between two agents or a human and an agent."""
     env = TicTacToe()
-    agents = {"X": agent1, "O": agent2}
+
+    players = {"X": player1, "O": player2}
     state = env.get_state()
 
     while True:
         player = env.current_player
+        opponent = "O" if player == "X" else "X"
 
         available_moves = env.get_available_moves()
-        action = agents[player].choose_action(state, available_moves)
+        action = players[player].choose_action(state, available_moves)
         env.make_move(action)
 
         next_state = env.get_state()
 
         if env.is_winner(player):
-            agents[player].learn(state, action, 1, next_state, [])
-            agents["O" if player == "X" else "X"].learn(state, action, -1, next_state, [])
+            # Only update AI agents
+            if hasattr(players[player], "learn"):
+                players[player].learn(state, action, 1, next_state, [])
+            if hasattr(players[opponent], "learn"):
+                players[opponent].learn(state, action, -1, next_state, [])
             return player
 
         if env.is_draw():
-            agents["X"].learn(state, action, 0.5, next_state, [])
-            agents["O"].learn(state, action, 0.5, next_state, [])
+            # Only update AI agents
+            for p in ["X", "O"]:
+                if hasattr(players[p], "learn"):
+                    players[p].learn(state, action, 0.5, next_state, [])
             return "draw"
 
-        agents[player].learn(state, action, 0, next_state, env.get_available_moves())
+        # Only update AI agents
+        if hasattr(players[player], "learn"):
+            players[player].learn(state, action, 0, next_state, env.get_available_moves())
         state = next_state
 
 
