@@ -99,5 +99,5 @@ TODO: Add chart of win results over n training games.
 ### Running Tests
 
 ```bash
-python3 -m unittest test_tictactoe.py
+python3 -m pytest
 ```
