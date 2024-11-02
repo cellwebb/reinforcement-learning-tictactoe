@@ -9,6 +9,11 @@ A Python implementation of a Tic-Tac-Toe AI that learns optimal play through Q-l
 - Save and load trained policies
 - Configurable learning parameters (alpha, gamma, epsilon)
 
+## Requirements
+
+- Python 3.9+
+- numpy
+
 ## Installation
 
 ```bash
@@ -19,7 +24,7 @@ pip install -r requirements.txt
 
 ## Usage
 
-Training the AI
+### Training the AI
 
 ```bash
 python tictactoe.py
@@ -27,7 +32,7 @@ python tictactoe.py
 
 This will train two agents through self-play for 1,000,000 episodes and save their policies to agent1.json and agent2.json.
 
-Playing Against the AI
+### Playing Against the AI
 
 ```py
 from tictactoe import LearningAgent, play_against_ai
@@ -38,6 +43,8 @@ ai_agent = LearningAgent(policy_file="agent1.json")
 # Play against the AI (True means human plays first)
 play_against_ai(ai_agent, human_plays_first=True)
 ```
+
+## Implementation Details
 
 ### Game Board Layout
 
@@ -67,18 +74,16 @@ The game board positions are numbered 0-8, arranged as follows:
 - Draw: +0.5
 - Ongoing: 0
 
-### Running Tests
+### Results
 
-```bash
-python -m unittest test_tictactoe.py
-```
+TODO: Add chart of win results over n training games.
 
 ### Project Structure
 
-- tictactoe.py: Main implementation of game environment and learning agents
-- test_tictactoe.py: Unit tests
-- requirements.txt: Project dependencies
-- agent1.json/agent2.json: Saved AI policies (created after training)
+- `tictactoe.py`: Main implementation of game environment and learning agents
+- `test_tictactoe.py`: Unit tests
+- `requirements.txt:` Project dependencies
+- `agent1.json`/`agent2.json`: Saved AI policies (created after training)
 
 ### Classes
 
@@ -88,3 +93,9 @@ python -m unittest test_tictactoe.py
   - Q-learning agent that learns optimal play through experience.
 - ```HumanPlayer```
   - Interface for human players to interact with the game.
+
+### Running Tests
+
+```bash
+python -m unittest test_tictactoe.py
+```
