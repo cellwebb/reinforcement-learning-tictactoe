@@ -120,10 +120,8 @@ class LearningAgent:
 class HumanPlayer:
     def choose_action(self, state, available_moves) -> int:
         """Get move from human player via console input."""
-        # Display the current board
         self.display_board(state)
 
-        # Show available moves
         print(f"Available moves (0-8): {available_moves}")
 
         while True:
@@ -176,7 +174,7 @@ def play_game(agent1: LearningAgent, agent2: LearningAgent) -> str:
         state = next_state
 
 
-def play_against_ai(ai_agent, human_plays_first=True):
+def play_against_ai(ai_agent, human_plays_first: bool = True) -> None:
     """Play a game against the AI agent."""
     human = HumanPlayer()
 
@@ -192,7 +190,7 @@ def play_against_ai(ai_agent, human_plays_first=True):
 def main():
     agent1 = LearningAgent()
     agent2 = LearningAgent()
-    num_episodes = 1_000_000
+    num_episodes = 10_000_000
 
     results = {"X": 0, "O": 0, "draw": 0}
     wins = {"Agent 1": 0, "Agent 2": 0, "draw": 0}
