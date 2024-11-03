@@ -10,18 +10,6 @@ from tictactoe import (
 )
 
 
-@pytest.fixture
-def game():
-    """Fixture to create a fresh game instance for each test."""
-    return TicTacToe()
-
-
-@pytest.fixture
-def agent():
-    """Fixture to create a fresh learning agent for each test."""
-    return LearningAgent()
-
-
 def test_initial_state(game):
     """Test that the game board is initialized correctly."""
     assert game.board == [" "] * 9
