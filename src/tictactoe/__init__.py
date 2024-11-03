@@ -158,7 +158,7 @@ class HumanPlayer:
 
 
 def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | HumanPlayer) -> str:
-    """Play a game of Tic-Tac-Toe between two agents or a human and an agent."""
+    """Play a game of Tic-Tac-Toe between two agents, two humans, or a human and an agent."""
     env = TicTacToe()
 
     players = {"X": player1, "O": player2}
@@ -224,8 +224,7 @@ def play_against_ai(ai_agent, human_plays_first: bool = True) -> None:
 def main():
     agent1 = LearningAgent()
     agent2 = LearningAgent()
-    num_episodes = 100_000
-
+    num_episodes = 100
     results = {"X": 0, "O": 0, "draw": 0}
     wins = {"Agent 1": 0, "Agent 2": 0, "draw": 0}
 
