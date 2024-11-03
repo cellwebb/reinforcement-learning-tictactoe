@@ -68,7 +68,7 @@ class LearningAgent:
         self.player_type = "agent"
 
     def get_q_value(self, state: tuple[str], action: int) -> float:
-        return self.q_table.get((state, action), 0.0)
+        return self.q_table.get((state, action), 1.0)
 
     def update_q_value(self, state: tuple[str], action: int, value: float) -> None:
         self.q_table[(state, action)] = value
@@ -178,7 +178,7 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
 
         if env.is_winner(player):
             if players[player].player_type == "agent":
-                players[player].learn(state, action, 1, next_state, [])
+                players[player].update_q_value(state, action, 1)
             if players[opponent].player_type == "agent":
                 players[opponent].learn(state, action, -1, next_state, [])
 
@@ -227,7 +227,7 @@ def play_against_ai(ai_agent, human_plays_first: bool = True) -> None:
 def main():
     agent1 = LearningAgent()
     agent2 = LearningAgent()
-    num_episodes = 10_000_000
+    num_episodes = 100_000_000
 
     results = {"X": 0, "O": 0, "draw": 0}
     wins = {"Agent 1": 0, "Agent 2": 0, "draw": 0}
