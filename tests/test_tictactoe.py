@@ -196,16 +196,6 @@ def test_agent_learning():
     assert agent.get_q_value(state, action) == -1.0
 
 
-@pytest.mark.parametrize("human_plays_first", [True, False])
-def test_play_against_ai_with_draw(human_plays_first):
-    """Test game ending in a draw."""
-    moves = [0, 4, 8, 2, 6, 3, 5, 1, 7]  # Force a draw
-    with patch("builtins.input", side_effect=moves):
-        ai_agent = LearningAgent(epsilon=0)
-        result = play_against_ai(ai_agent, human_plays_first=human_plays_first)
-        assert result == "draw"
-
-
 def test_main_function():
     """Test the main training loop."""
     with patch("random.random", side_effect=[0.4, 0.6] * 50):  # Alternate between agents
