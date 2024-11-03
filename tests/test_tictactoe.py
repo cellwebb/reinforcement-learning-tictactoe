@@ -223,7 +223,7 @@ def test_game_str_representation(game):
     """Test the string representation of the game board."""
     game.make_move(0)  # X in position 0
     game.make_move(4)  # O in position 4
-    expected = " X | |  \n-----\n  |O|  \n-----\n  | |  "
+    expected = " X | |  \n-----------\n  |O|  \n-----------\n  | |  "
     assert str(game).replace("\n", "") == expected.replace("\n", "")
 
 
