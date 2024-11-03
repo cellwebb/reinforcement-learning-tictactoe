@@ -144,7 +144,6 @@ class HumanPlayer:
 
     def choose_action(self, state: tuple[str], available_moves: list[int]) -> int:
         """Get move from human player via console input."""
-        self.display_board(state)
 
         print(f"Available moves (0-8): {available_moves}")
 
@@ -165,6 +164,9 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
     players = {"X": player1, "O": player2}
     state = env.get_state()
 
+    if "human" in [players["X"].player_type, players["O"].player_type]:
+        print(env)
+
     while True:
         player = env.current_player
         opponent = "O" if player == "X" else "X"
@@ -173,6 +175,9 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
         action = players[player].choose_action(state, available_moves)
         env.make_move(action)
 
+        if "human" in [players["X"].player_type, players["O"].player_type]:
+            print(env)
+
         next_state = env.get_state()
 
         if env.is_winner(player):
@@ -180,20 +185,12 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
                 players[player].update_q_value(state, action, 1)
             if players[opponent].player_type == "agent":
                 players[opponent].learn(state, action, -1, next_state, [])
-
-            if "human" in [players["X"].player_type, players["O"].player_type]:
-                print(env)
-
             return player
 
         if env.is_draw():
             for p in ["X", "O"]:
                 if players[p].player_type == "agent":
                     players[p].learn(state, action, 0.5, next_state, [])
-
-            if "human" in [players["X"].player_type, players["O"].player_type]:
-                print(env)
-
             return "draw"
 
         if players[player].player_type == "agent":

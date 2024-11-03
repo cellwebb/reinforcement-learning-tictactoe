@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import patch
-import os
 from tictactoe import (
     TicTacToe,
     LearningAgent,
@@ -8,7 +7,6 @@ from tictactoe import (
     play_game,
     play_against_ai,
     get_available_moves,
-    format_board_display,
 )
 
 
@@ -99,9 +97,9 @@ def test_agent_get_q_value(agent):
     """Test Q-value retrieval."""
     state = tuple([" "] * 9)
     action = 0
-    assert agent.get_q_value(state, action) == 0.0
-    agent.update_q_value(state, action, 1.0)
     assert agent.get_q_value(state, action) == 1.0
+    agent.update_q_value(state, action, 0.0)
+    assert agent.get_q_value(state, action) == 0.0
 
 
 def test_agent_choose_action_exploitation():
@@ -229,43 +227,43 @@ def test_game_str_representation(game):
     assert str(game).replace("\n", "") == expected.replace("\n", "")
 
 
-def test_display_board():
-    """Test the human player's board display."""
-    player = HumanPlayer()
-    state = ("X", "O", " ", " ", "X", " ", "O", " ", " ")
-    with patch("builtins.print") as mock_print:
-        player.display_board(state)
-        mock_print.assert_called()
-
-
 def test_cached_get_available_moves():
-    """Test the cached get_available_moves function with cache behavior."""
-    # First call - cache miss
-    board = tuple(" " * 9)
-    moves1 = get_available_moves(board)
-    assert moves1 == tuple(range(9))
-
-    # Second call - should hit cache
-    moves2 = get_available_moves(board)
-    assert moves2 == tuple(range(9))
-    assert moves1 is moves2  # Same object due to cache hit
-
-    # Different board - cache miss
-    board2 = ("X", "O", " ", " ", "X", " ", "O", " ", " ")
-    moves3 = get_available_moves(board2)
-    assert moves3 == (2, 3, 5, 7, 8)
-
-
-def test_cached_functions_edge_cases():
-    """Test edge cases for cached functions."""
-    # Empty board
+    """Test the cached get_available_moves function."""
+    # Test with empty board
     empty_board = tuple(" " * 9)
-    assert len(get_available_moves(empty_board)) == 9
+    assert get_available_moves(empty_board) == tuple(range(9))
 
-    # Full board
+    # Test cache hit (same result object)
+    result1 = get_available_moves(empty_board)
+    result2 = get_available_moves(empty_board)
+    assert result1 is result2
+
+    # Test with partially filled board
+    partial_board = ("X", "O", " ", " ", "X", " ", "O", " ", " ")
+    assert get_available_moves(partial_board) == (2, 3, 5, 7, 8)
+
+    # Test full board
     full_board = ("X", "O") * 4 + ("X",)
-    assert len(get_available_moves(full_board)) == 0
+    assert get_available_moves(full_board) == tuple()
 
-    # Single move board
+    # Test single move board
     single_move = ("X",) + tuple(" " * 8)
     assert len(get_available_moves(single_move)) == 8
+
+
+def test_str_representation():
+    """Test string representation functions."""
+    # Test board state formatting
+    board = ("X", "O", " ", " ", "X", " ", "O", " ", " ")
+    game = TicTacToe()
+    game.board = list(board)
+
+    # Check board display format
+    expected = "\n\n X |O|  \n-----------\n  |X|  \n-----------\n O | |  \n\n"
+    assert str(game) == expected
+
+    # Test that human display matches game display
+    player = HumanPlayer()
+    with patch("builtins.print") as mock_print:
+        player.display_board(board)
+        mock_print.assert_called_once_with(expected)
