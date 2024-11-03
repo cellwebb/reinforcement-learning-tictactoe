@@ -20,15 +20,17 @@ class TicTacToe:
     def __init__(self, starting_player: str = "X"):
         self.board = [" " for _ in range(9)]
         self.current_player = starting_player
+        self.moves = []
 
     def get_available_moves(self) -> list[int]:
-        return [i for i, mark in enumerate(self.board) if mark == " "]
+        return [i for i in range(9) if self.board[i] == " "]
 
     def make_move(self, position: int) -> None:
         if self.board[position] != " ":
             raise ValueError("Invalid move")
         self.board[position] = self.current_player
         self.current_player = "O" if self.current_player == "X" else "X"
+        self.moves.append(position)
 
     def is_winner(self, player: str) -> bool:
         return any(all(self.board[i] == player for i in condition) for condition in WIN_CONDITIONS)
