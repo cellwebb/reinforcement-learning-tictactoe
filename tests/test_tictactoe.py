@@ -1,7 +1,15 @@
 import pytest
 from unittest.mock import patch
 import os
-from tictactoe import TicTacToe, LearningAgent, HumanPlayer, play_game, play_against_ai
+from tictactoe import (
+    TicTacToe,
+    LearningAgent,
+    HumanPlayer,
+    play_game,
+    play_against_ai,
+    get_available_moves,
+    format_board_display,
+)
 
 
 @pytest.fixture
@@ -228,3 +236,36 @@ def test_display_board():
     with patch("builtins.print") as mock_print:
         player.display_board(state)
         mock_print.assert_called()
+
+
+def test_cached_get_available_moves():
+    """Test the cached get_available_moves function with cache behavior."""
+    # First call - cache miss
+    board = tuple(" " * 9)
+    moves1 = get_available_moves(board)
+    assert moves1 == tuple(range(9))
+
+    # Second call - should hit cache
+    moves2 = get_available_moves(board)
+    assert moves2 == tuple(range(9))
+    assert moves1 is moves2  # Same object due to cache hit
+
+    # Different board - cache miss
+    board2 = ("X", "O", " ", " ", "X", " ", "O", " ", " ")
+    moves3 = get_available_moves(board2)
+    assert moves3 == (2, 3, 5, 7, 8)
+
+
+def test_cached_functions_edge_cases():
+    """Test edge cases for cached functions."""
+    # Empty board
+    empty_board = tuple(" " * 9)
+    assert len(get_available_moves(empty_board)) == 9
+
+    # Full board
+    full_board = ("X", "O") * 4 + ("X",)
+    assert len(get_available_moves(full_board)) == 0
+
+    # Single move board
+    single_move = ("X",) + tuple(" " * 8)
+    assert len(get_available_moves(single_move)) == 8

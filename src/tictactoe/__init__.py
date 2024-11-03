@@ -1,6 +1,7 @@
 import random
 import json
 from typing import Optional
+from functools import lru_cache
 
 WIN_CONDITIONS = [
     [0, 1, 2],  # Horizontal
@@ -14,6 +15,12 @@ WIN_CONDITIONS = [
 ]
 
 
+@lru_cache(maxsize=19683)  # 3^9 possible board states
+def get_available_moves(board: tuple[str, ...]) -> tuple[int, ...]:
+    """Get available moves for a given board state."""
+    return tuple(i for i, mark in enumerate(board) if mark == " ")
+
+
 class TicTacToe:
     """Tic-Tac-Toe game environment."""
 
@@ -23,7 +30,8 @@ class TicTacToe:
         self.moves = []
 
     def get_available_moves(self) -> list[int]:
-        return [i for i in range(9) if self.board[i] == " "]
+        """Get list of empty positions."""
+        return list(get_available_moves(self.get_state()))
 
     def make_move(self, position: int) -> None:
         if self.board[position] != " ":
@@ -42,14 +50,14 @@ class TicTacToe:
         return tuple(self.board)
 
     def __str__(self):
-        result = "\n"
-        result += f"\n {self.board[0]} | {self.board[1]} | {self.board[2]} "
-        result += "\n-----------"
-        result += f"\n {self.board[3]} | {self.board[4]} | {self.board[5]} "
-        result += "\n-----------"
-        result += f"\n {self.board[6]} | {self.board[7]} | {self.board[8]} "
-        result += "\n"
-        return result
+        return (
+            "\n\n"
+            f" {self.state[0]} | {self.state[1]} | {self.state[2]} \n"
+            "-----------\n"
+            f" {self.state[3]} | {self.state[4]} | {self.state[5]} \n"
+            "-----------\n"
+            f" {self.state[6]} | {self.state[7]} | {self.state[8]} \n\n"
+        )
 
 
 class LearningAgent:
@@ -148,17 +156,6 @@ class HumanPlayer:
                 print("Invalid move, try again")
             except ValueError:
                 print("Please enter an available move")
-
-    def display_board(self, state: tuple[str]) -> None:
-        """Display the board with numbered positions."""
-        board = [" " if x == 0 else x for x in state]
-        print("\n")
-        print(f" {board[0]} | {board[1]} | {board[2]} ")
-        print("-----------")
-        print(f" {board[3]} | {board[4]} | {board[5]} ")
-        print("-----------")
-        print(f" {board[6]} | {board[7]} | {board[8]} ")
-        print("\n")
 
 
 def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | HumanPlayer) -> str:
