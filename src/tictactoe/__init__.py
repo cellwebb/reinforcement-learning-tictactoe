@@ -52,11 +52,11 @@ class TicTacToe:
     def __str__(self):
         return (
             "\n\n"
-            f" {self.state[0]} | {self.state[1]} | {self.state[2]} \n"
+            f" {self.board[0]} | {self.board[1]} | {self.board[2]} \n"
             "-----------\n"
-            f" {self.state[3]} | {self.state[4]} | {self.state[5]} \n"
+            f" {self.board[3]} | {self.board[4]} | {self.board[5]} \n"
             "-----------\n"
-            f" {self.state[6]} | {self.state[7]} | {self.state[8]} \n\n"
+            f" {self.board[6]} | {self.board[7]} | {self.board[8]} \n\n"
         )
 
 
@@ -164,7 +164,8 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
     players = {"X": player1, "O": player2}
     state = env.get_state()
 
-    if "human" in [players["X"].player_type, players["O"].player_type]:
+    human_in_game = "human" in [players["X"].player_type, players["O"].player_type]
+    if human_in_game:
         print(env)
 
     while True:
@@ -175,7 +176,7 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
         action = players[player].choose_action(state, available_moves)
         env.make_move(action)
 
-        if "human" in [players["X"].player_type, players["O"].player_type]:
+        if human_in_game:
             print(env)
 
         next_state = env.get_state()
