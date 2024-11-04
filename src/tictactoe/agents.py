@@ -40,17 +40,11 @@ class LearningAgent:
             max_q = max(q_values.values())
             return random.choice([action for action, q in q_values.items() if q == max_q])
 
-    def learn(
-        self,
-        state: str,
-        action: int,
-        reward: float,
-        next_state: str | None = None,
-        next_available_moves: tuple[int, ...] | None = None,
-    ) -> None:
+    def learn(self, state: str, action: int, reward: float, next_state: str | None = None) -> None:
         """Update Q-value based on reward and learned value."""
         old_q = self.get_q_value(state, action)
-        if next_available_moves:
+        if next_state:
+            next_available_moves = get_available_moves(next_state)
             future_rewards = []
             for next_action in next_available_moves:
                 # Simulate the player's next state after the opponent's move

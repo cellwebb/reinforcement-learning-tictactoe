@@ -73,7 +73,7 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
             return "draw"
 
         if players[player].player_type == "agent":
-            players[player].learn(state, action, 0, new_state, get_available_moves(new_state))
+            players[player].learn(state, action, 0, new_state)
 
 
 def play_against_ai(ai_agent, human_plays_first: bool = True) -> None:
