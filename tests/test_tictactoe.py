@@ -185,7 +185,7 @@ def test_agent_learning():
     assert agent.get_q_value(state, action) == -1.0
 
 
-def test_main_function():
+def test_train_function():
     """Test the main training loop."""
     with patch("random.random", side_effect=[0.4, 0.6] * 50):  # Alternate between agents
         with patch("tictactoe.play_game") as mock_play:
@@ -193,9 +193,9 @@ def test_main_function():
             mock_play.side_effect = ["X", "O", "draw"] * 33334
 
             # Run main with reduced episodes for testing
-            from tictactoe import main
+            from tictactoe import train
 
-            main()
+            train()
 
 
 def test_cached_get_available_moves():
@@ -297,14 +297,14 @@ def test_q_learning_edge_cases():
     assert agent.get_q_value(state, action) > 0
 
 
-def test_main_with_different_episodes():
+def test_train_with_different_episodes():
     """Test main function with different episode counts."""
     with patch("random.random", return_value=0.4):
         with patch("tictactoe.play_game", return_value="X"):
-            from tictactoe import main
+            from tictactoe import train
 
             with patch("builtins.print"):  # Suppress output
-                main()  # Should complete without errors
+                train()  # Should complete without errors
 
 
 def test_state_history_tracking():
