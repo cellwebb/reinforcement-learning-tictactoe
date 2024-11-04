@@ -11,10 +11,10 @@ class LearningAgent:
 
     def __init__(
         self,
-        alpha: float = 0.1,
-        gamma: float = 0.9,
-        epsilon: float = 0.1,
-        epsilon_decay: float = 1.0,
+        alpha: float = 0.3,
+        gamma: float = 0.95,
+        epsilon: float = 1.0,
+        epsilon_decay: float = 0.999,
         win_reward: float = 1.0,
         draw_reward: float = 0.5,
         loss_reward: float = -1.0,
@@ -42,10 +42,12 @@ class LearningAgent:
         self.player_type = "agent"
 
     def get_q_value(self, state: str, action: int) -> float:
-        return self.q_table.get((state, action), self.starting_q_value)
+        return self.q_table.get(state, {}).get(action, self.starting_q_value)
 
     def update_q_value(self, state: str, action: int, value: float) -> None:
-        self.q_table[(state, action)] = value
+        if state not in self.q_table:
+            self.q_table[state] = {}
+        self.q_table[state][action] = value
 
     def choose_action(self, state: str, available_moves: tuple[int]) -> int:
         if not available_moves:
@@ -99,32 +101,25 @@ class LearningAgent:
 
             i -= 2
 
+        # self.epsilon *= self.epsilon_decay
+
     def save_policy(self, filename: str = None) -> None:
         """Save the Q-table to a file."""
         if filename is None:
             filename = self.policy_outfile
-        serialized_q_table = {
-            self._serialize_key(state, action): value
-            for (state, action), value in self.q_table.items()
-        }
         with open(filename, "w") as f:
-            json.dump(serialized_q_table, f)
+            json.dump(self.q_table, f)
+        print(f"Q-table saved to {filename}: {self.q_table}")  # Debug print
 
     def load_policy(self, filename: str) -> None:
         with open(filename, "r") as f:
-            serialized_q_table = json.load(f)
-            self.q_table = {
-                self._deserialize_key(key): value for key, value in serialized_q_table.items()
-            }
-
-    def _serialize_key(self, state: str, action: int) -> str:
-        """Convert a state-action pair to a string key."""
-        return f"{state}_{action}"
-
-    def _deserialize_key(self, key: str) -> tuple[str, int]:
-        """Convert a string key back to state-action pair."""
-        state, action = key.rsplit("_", 1)
-        return state, int(action)
+            self.q_table = json.load(f)
+        # action needs to be an int, but json keys are always strings
+        self.q_table = {
+            state: {int(action): value for action, value in actions.items()}
+            for state, actions in self.q_table.items()
+        }
+        print(f"Q-table loaded from {filename}: {self.q_table}")  # Debug print
 
     @lru_cache(maxsize=None)
     def get_state_action_pairs(self, state: str):
@@ -151,7 +146,9 @@ class LearningAgent:
         if not state_action_pairs:
             return 0
 
-        return max(self.q_table.get((state, action), -99) for state, action in state_action_pairs)
+        return max(
+            self.q_table.get(state, {}).get(action, -99) for state, action in state_action_pairs
+        )
 
 
 class HumanPlayer:

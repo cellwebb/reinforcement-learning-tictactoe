@@ -107,9 +107,9 @@ def test_agent_choose_action_exploitation():
 def test_agent_policy_save_load(tmp_path):
     """Test policy saving and loading."""
     agent = LearningAgent()
-    state = "         "
+    state = " " * 9
     action = 0
-    agent.update_q_value(state, action, 1.0)
+    agent.q_table[state] = {action: 1.0}
 
     # Use tmp_path fixture for temporary file
     policy_file = tmp_path / "test_policy.json"
@@ -288,21 +288,6 @@ def test_state_history_tracking():
     game.make_move(0)
     assert len(game.state_history) == 2
     assert len(game.move_history) == 1
-
-
-def test_agent_serialization_roundtrip():
-    """Test complete serialization/deserialization cycle."""
-    agent = LearningAgent()
-    state = "         "
-    action = 0
-    value = 0.5
-
-    agent.update_q_value(state, action, value)
-    key = agent._serialize_key(state, action)
-    restored_state, restored_action = agent._deserialize_key(key)
-
-    assert restored_state == state
-    assert restored_action == action
 
 
 def test_multiple_game_outcomes():

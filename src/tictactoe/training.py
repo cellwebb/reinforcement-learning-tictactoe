@@ -23,10 +23,12 @@ def train(
     elif not agent2:
         agent2 = LearningAgent()
 
+    starting_epsilons = (agent1.epsilon, agent2.epsilon)
+
     results = {"X": 0, "O": 0, "draw": 0}
     wins = {"Agent 1": 0, "Agent 2": 0, "draw": 0}
 
-    for _ in tqdm(range(num_episodes), desc="Training Progress"):
+    for i in tqdm(range(num_episodes), desc="Training Progress"):
         if single_agent_training or (switch_sides and random.random() < 0.5):
             result = play_game(agent1, agent2)
 
@@ -47,6 +49,9 @@ def train(
                 wins["draw"] += 1
 
         results[result] += 1
+
+        agent1.epsilon = starting_epsilons[0] * 0.9999**i
+        # agent2.epsilon = starting_epsilons[1] * 0.9999**i
 
     print(f"Results: {results}")
     if not single_agent_training:
