@@ -1,6 +1,6 @@
 import random
 import json
-import yaml
+import yaml  # Ensure PyYAML is imported for YAML parsing
 from functools import lru_cache
 
 WIN_CONDITIONS = [
@@ -234,6 +234,7 @@ def train(
     single_agent_training: bool = False,
     agent1_policy_file: str = None,
     agent2_policy_file: str = None,
+    switch_sides: bool = True,
 ) -> None:
     """Train two agents to play Tic-Tac-Toe against each other."""
 
@@ -249,7 +250,7 @@ def train(
     wins = {"Agent 1": 0, "Agent 2": 0, "draw": 0}
 
     for _ in range(num_episodes):
-        if random.random() < 0.5:
+        if switch_sides or random.random() < 0.5:
             result = play_game(agent1, agent2)
 
             if result == "X":
@@ -289,17 +290,8 @@ def cli():
     # Subparser for the 'train' command
     train_parser = subparsers.add_parser("train", help="Train the AI agent")
     train_parser.add_argument(
-        "--num-episodes", type=int, default=100, help="Number of training episodes"
+        "--config", type=str, help="Path to configuration file", default="config.yaml"
     )
-    train_parser.add_argument("--alpha", type=float, default=0.1, help="Learning rate")
-    train_parser.add_argument("--gamma", type=float, default=0.9, help="Discount factor")
-    train_parser.add_argument("--epsilon", type=float, default=0.1, help="Exploration rate")
-    train_parser.add_argument(
-        "--single-agent-training", action="store_true", help="Train a single agent"
-    )
-    train_parser.add_argument("--agent1", type=str, help="Policy file for agent 1")
-    train_parser.add_argument("--agent2", type=str, help="Policy file for agent 2")
-    train_parser.add_argument("--config", type=str, help="Path to configuration file")
 
     # Subparser for the 'play' command
     play_parser = subparsers.add_parser("play", help="Play against the AI agent")
@@ -310,32 +302,57 @@ def cli():
 
     if args.command == "train":
         if args.config:
-
             with open(args.config, "r") as f:
                 config = yaml.safe_load(f)
 
-            args.num_episodes = config.get("num_episodes", args.num_episodes)
-            args.alpha = config.get("alpha", args.alpha)
-            args.gamma = config.get("gamma", args.gamma)
-            args.epsilon = config.get("epsilon", args.epsilon)
-            args.single_agent_training = config.get(
-                "single_agent_training", args.single_agent_training
-            )
-            args.agent1 = config.get("agent1", args.agent1)
-            args.agent2 = config.get("agent2", args.agent2)
+            num_episodes = config.get("num_episodes", 100)
+            single_agent_training = config.get("single_agent_training", False)
+            agents_config = config.get("agents", {})
 
-        agent1 = LearningAgent(alpha=args.alpha, gamma=args.gamma, epsilon=args.epsilon)
-        if args.single_agent_training:
+            agent1_config = agents_config.get("agent1", {})
+            agent2_config = agents_config.get("agent2", {})
+
+            agent1_infile = agent1_config.get("infile", "")
+            agent1_outfile = agent1_config.get("outfile", "")
+            agent1_alpha = agent1_config.get("alpha", 0.1)
+            agent1_gamma = agent1_config.get("gamma", 0.9)
+            agent1_epsilon = agent1_config.get("epsilon", 0.1)
+
+            agent2_infile = agent2_config.get("infile", "")
+            agent2_outfile = agent2_config.get("outfile", "")
+            agent2_alpha = agent2_config.get("alpha", 0.1)
+            agent2_gamma = agent2_config.get("gamma", 0.9)
+            agent2_epsilon = agent2_config.get("epsilon", 0.1)
+
+        # Initialize Agent 1
+        agent1 = LearningAgent(
+            alpha=agent1_alpha,
+            gamma=agent1_gamma,
+            epsilon=agent1_epsilon,
+            policy_file=agent1_infile if agent1_infile else None,
+        )
+
+        # Initialize Agent 2
+        if single_agent_training:
             agent2 = agent1
+            agent2_outfile = agent1_outfile  # Ensure both agents save to the same outfile
         else:
-            agent2 = LearningAgent(alpha=args.alpha, gamma=args.gamma, epsilon=args.epsilon)
+            agent2 = LearningAgent(
+                alpha=agent2_alpha,
+                gamma=agent2_gamma,
+                epsilon=agent2_epsilon,
+                policy_file=agent2_infile if agent2_infile else None,
+            )
+
+        # Start Training
         train(
             agent1=agent1,
             agent2=agent2,
-            num_episodes=args.num_episodes,
-            agent1_policy_file=args.agent1,
-            agent2_policy_file=args.agent2,
+            num_episodes=num_episodes,
+            agent1_policy_file=agent1_outfile,
+            agent2_policy_file=agent2_outfile,
         )
+
     elif args.command == "play":
         try:
             agent = LearningAgent(policy_file=args.policy)

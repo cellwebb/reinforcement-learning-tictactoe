@@ -1,7 +1,19 @@
-num_episodes: 100000
-alpha: 0.3
-gamma: 0.9
-epsilon: 0.1
-single_agent_training: false
-agent1: agent1.json
-agent2: agent2.json
+num_episodes: 100_000
+
+single_agent_training: false  # If true, only agent1 will be trained
+
+# If infile is not empty, the agent will load the Q-table from the file
+# If outfile is not empty, the agent will save the Q-table to the file
+agents:
+  agent1:
+    infile: ""
+    outfile: "agent1.json"
+    alpha: 0.3
+    gamma: 0.9
+    epsilon: 0.1
+  agent2:
+    infile: ""
+    outfile: "agent2.json"
+    alpha: 0.2
+    gamma: 0.8
+    epsilon: 0.2
