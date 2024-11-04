@@ -428,9 +428,12 @@ agents:
         assert len(q_table2) > 0  # Ensure Q-table is not empty
 
 
-def test_cli_play_missing_policy(capsys):
+def test_cli_play_missing_policy(capsys, pytestconfig):
     """Test CLI play mode with missing policy file."""
     import sys
+
+    # Add the '-s' option to allow reading from stdin
+    pytestconfig.option.capture = "no"
 
     # Mock argv with the 'play' command but without '--policy'
     with patch.object(sys, "argv", ["tictactoe", "play"]):
@@ -438,6 +441,9 @@ def test_cli_play_missing_policy(capsys):
             cli()  # Should now work correctly
         captured = capsys.readouterr()
         assert "the following arguments are required: --policy" in captured.err
+
+    # Restore the capture option
+    pytestconfig.option.capture = "fd"
 
 
 def test_cli_play_nonexistent_policy(capsys):

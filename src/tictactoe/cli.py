@@ -70,10 +70,7 @@ def cli():
 
     elif args.command == "play":
         try:
-            agent = LearningAgent(
-                policy_infile=args.policy,
-                policy_outfile=None,  # Outfile not needed when playing
-            )
+            agent = LearningAgent(epsilon=0, policy_infile=args.policy)
             play_against_ai(agent, human_plays_first=not args.ai_first)
         except FileNotFoundError:
             print(f"Error: Policy file '{args.policy}' not found")
