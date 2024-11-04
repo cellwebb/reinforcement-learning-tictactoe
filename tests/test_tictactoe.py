@@ -149,7 +149,7 @@ def test_full_game_play():
 
 
 @patch("builtins.input", side_effect=["0", "1", "2", "3", "4", "5", "6", "7", "8"])
-def test_play_against_ai(mock_input):
+def test_play_against_ai(mock_input, capsys):
     """Test game against AI.
 
     Provides a sequence of all possible moves to ensure the game can complete
@@ -157,18 +157,20 @@ def test_play_against_ai(mock_input):
     a game-ending condition is reached.
     """
     ai_agent = LearningAgent(epsilon=0)
-    result = play_against_ai(ai_agent, human_plays_first=True)
+    with capsys.disabled():
+        result = play_against_ai(ai_agent, human_plays_first=True)
     assert result in ["X", "O", "draw"]
 
 
 @patch("builtins.input", side_effect=["0", "1", "2", "3", "4", "5", "6", "7", "8"])
-def test_play_against_ai_ai_first(mock_input):
+def test_play_against_ai_ai_first(mock_input, capsys):
     """Test game against AI where AI plays first.
 
     Similar to test_play_against_ai but with AI making the first move.
     """
     ai_agent = LearningAgent(epsilon=0)
-    result = play_against_ai(ai_agent, human_plays_first=False)
+    with capsys.disabled():
+        result = play_against_ai(ai_agent, human_plays_first=False)
     assert result in ["X", "O", "draw"]
 
 
@@ -428,12 +430,9 @@ agents:
         assert len(q_table2) > 0  # Ensure Q-table is not empty
 
 
-def test_cli_play_missing_policy(capsys, pytestconfig):
+def test_cli_play_missing_policy(capsys):
     """Test CLI play mode with missing policy file."""
     import sys
-
-    # Add the '-s' option to allow reading from stdin
-    pytestconfig.option.capture = "no"
 
     # Mock argv with the 'play' command but without '--policy'
     with patch.object(sys, "argv", ["tictactoe", "play"]):
@@ -441,9 +440,6 @@ def test_cli_play_missing_policy(capsys, pytestconfig):
             cli()  # Should now work correctly
         captured = capsys.readouterr()
         assert "the following arguments are required: --policy" in captured.err
-
-    # Restore the capture option
-    pytestconfig.option.capture = "fd"
 
 
 def test_cli_play_nonexistent_policy(capsys):
