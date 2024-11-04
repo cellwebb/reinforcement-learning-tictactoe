@@ -46,3 +46,15 @@ def opponent_wins_next_turn(state: str, player_mark: str) -> bool:
 def opponent_can_draw(state: str) -> bool:
     """Check if the opponent can force a draw."""
     return state.count(" ") == 1
+
+
+@lru_cache(maxsize=19683)
+def possible_next_states(state: str, mark: str) -> list[str]:
+    """Get all possible next states for a given player."""
+    return [
+        "".join(
+            state[:action] + mark + state[action + 1 :] if mark == " " else mark
+            for action, mark in enumerate(state)
+        )
+        for action in get_available_moves(state)
+    ]
