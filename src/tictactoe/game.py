@@ -1,4 +1,4 @@
-from .utils import get_available_moves, is_winner, is_draw, opponent_can_win
+from .utils import get_available_moves, is_winner, is_draw, opponent_can_win, opponent_can_draw
 from .agents import LearningAgent, HumanPlayer
 
 
@@ -46,7 +46,6 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
 
     while True:
         player_mark = env.current_player
-        opponent_mark = "O" if player_mark == "X" else "X"
 
         state = env.get_state()
         available_moves = get_available_moves(state)
@@ -63,8 +62,6 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
         new_state = env.get_state()
 
         if players[player_mark].player_type == "agent":
-            reward = 0
-
             if is_winner(new_state, player_mark):
                 reward = 1.0
                 players[player_mark].learn(state, action, 1.0, done=True)
@@ -75,11 +72,14 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
                 players[player_mark].learn(state, action, 0.5, done=True)
                 return "draw"
 
-            # if opponent can win in the next move, reward the player with -1
             if opponent_can_win(new_state, player_mark):
                 reward = -1.0
                 players[player_mark].learn(state, action, -1.0, done=True)
-                continue
+            elif opponent_can_draw(new_state):
+                reward = 0.5
+                players[player_mark].learn(state, action, 0.5, done=True)
+            else:
+                reward = 0
 
             players[player_mark].learn(state, action, reward, new_state, player_mark)
 

@@ -40,3 +40,9 @@ def opponent_can_win(state: str, player_mark: str) -> bool:
         if is_winner(simulated_state, opponent_mark):
             return True
     return False
+
+
+@lru_cache(maxsize=19683)
+def opponent_can_draw(state: str) -> bool:
+    """Check if the opponent can force a draw."""
+    return state.count(" ") == 1
