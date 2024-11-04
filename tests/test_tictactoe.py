@@ -174,22 +174,6 @@ def test_play_against_ai_ai_first(mock_input, capsys):
     assert result in ["X", "O", "draw"]
 
 
-def test_agent_learning():
-    """Test that agent actually learns from experience."""
-    agent = LearningAgent(alpha=1.0, gamma=1.0, epsilon=0)
-    state = "         "
-    action = 0
-    next_state = "X        "
-
-    # Test winning scenario
-    agent.learn(state, action, 1.0, next_state, "X")
-    assert agent.get_q_value(state, action) == 1.0
-
-    # Test losing scenario
-    agent.learn(state, action, -1.0, next_state, "X")
-    assert agent.get_q_value(state, action) == -1.0
-
-
 def test_train_function():
     """Test the main training loop."""
     with patch(
@@ -288,26 +272,11 @@ def test_play_against_ai_returns_none():
         assert result in ["X", "O", "draw"]
 
 
-def test_q_learning_edge_cases():
-    """Test Q-learning in edge cases."""
-    agent = LearningAgent()
-    state = "         "
-    action = 0
-
-    # Test learning with no next state
-    agent.learn(state, action, 1.0)
-    assert agent.get_q_value(state, action) > 0
-
-    # Test learning with empty next moves
-    agent.learn(state, action, 1.0, state, "X")
-    assert agent.get_q_value(state, action) > 0
-
-
 def test_train_with_different_episodes():
     """Test main function with different episode counts."""
     with patch("random.random", return_value=0.4):
         with patch("tictactoe.play_game", return_value="X"):
-            train()  # Should now work correctly
+            train()
 
 
 def test_state_history_tracking():
@@ -342,7 +311,7 @@ def test_multiple_game_outcomes():
     agent1 = LearningAgent(epsilon=0.5)
     agent2 = LearningAgent(epsilon=0.5)
 
-    # Play more games to ensure we see all possible outcomes
+    # Play multiple games to ensure we see all possible outcomes
     for _ in range(1000):
         outcome = play_game(agent1, agent2)
         outcomes.add(outcome)

@@ -1,20 +1,14 @@
-import random
-from .utils import (
-    get_available_moves,
-    is_winner,
-    is_draw,
-    opponent_wins_next_turn,
-    opponent_can_draw,
-)
+from pprint import pprint
+from .utils import get_available_moves, is_winner, is_draw
 from .agents import LearningAgent, HumanPlayer
 
 
 class TicTacToe:
     """Tic-Tac-Toe game environment."""
 
-    def __init__(self, starting_player: str = "X"):
+    def __init__(self):
         self.board = [" " for _ in range(9)]
-        self.current_player = starting_player
+        self.current_player = "X"
         self.state_history = [self.get_state()]
         self.move_history = []
 
@@ -57,46 +51,30 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
         state = env.get_state()
         available_moves = get_available_moves(state)
 
-        if not available_moves:
-            return "draw"
-
-        for action in random.choices(available_moves):
-            simulated_state = list(state)
-            simulated_state[action] = player_mark
-            simulated_state = "".join(simulated_state)
-            if is_winner(simulated_state, player_mark):
-                action = action
-                break
-
-        else:
-            action = players[player_mark].choose_action(state, available_moves)
+        action = players[player_mark].choose_action(state, available_moves)
         env.make_move(action)
+        new_state = env.get_state()
 
         if human_in_game:
             print(env)
 
-        new_state = env.get_state()
+        if is_winner(new_state, player_mark):
+            result = player_mark
+            for mark in ["X", "O"]:
+                first_player = mark == player_mark
+                players[mark].learn(result, env.state_history, env.move_history, first_player)
 
-        if players[player_mark].player_type == "agent":
-            if is_winner(new_state, player_mark):
-                reward = 100
-                players[player_mark].learn(state, action, reward, done=True)
-                return player_mark
+            break
 
-            if is_draw(new_state):
-                reward = 10
-                players[player_mark].learn(state, action, reward, done=True)
-                return "draw"
+        if is_draw(new_state):
+            result = "draw"
+            for mark in ["X", "O"]:
+                first_player = mark == player_mark
+                players[mark].learn(result, env.state_history, env.move_history, first_player)
 
-            if opponent_wins_next_turn(new_state, player_mark):
-                reward = -1
-                players[player_mark].learn(state, action, reward, done=True)
-            elif opponent_can_draw(new_state):
-                reward = 10
-                players[player_mark].learn(state, action, reward, done=True)
-            else:
-                reward = 0
-                players[player_mark].learn(state, action, reward, new_state, player_mark)
+            break
+
+    return result
 
 
 def play_against_ai(ai_agent, human_plays_first: bool = True) -> str:

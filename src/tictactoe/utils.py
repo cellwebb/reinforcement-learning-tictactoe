@@ -50,7 +50,7 @@ def opponent_can_draw(state: str) -> bool:
 
 @lru_cache(maxsize=19683)
 def possible_next_states(state: str, mark: str) -> list[str]:
-    """Get all possible next states for a given player."""
+    """Get all possible next states for a given state."""
     return [
         "".join(
             state[:action] + mark + state[action + 1 :] if mark == " " else mark

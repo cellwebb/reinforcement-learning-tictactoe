@@ -1,5 +1,6 @@
 import argparse
 import yaml
+from pprint import pprint
 from .agents import LearningAgent
 from .game import play_against_ai
 from .training import train as train_game  # Updated import
@@ -36,6 +37,8 @@ def cli():
 
             agent1_config = agents_config.get("agent1", {})
             agent2_config = agents_config.get("agent2", {})
+
+            pprint(config)
 
         # Initialize Agent 1
         agent1 = LearningAgent(
