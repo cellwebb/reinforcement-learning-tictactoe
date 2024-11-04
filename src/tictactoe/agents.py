@@ -40,7 +40,14 @@ class LearningAgent:
             max_q = max(q_values.values())
             return random.choice([action for action, q in q_values.items() if q == max_q])
 
-    def learn(self, state: str, action: int, reward: float, next_state: str | None = None) -> None:
+    def learn(
+        self,
+        state: str,
+        action: int,
+        reward: float,
+        next_state: str | None = None,
+        mark: str = None,
+    ) -> None:
         """Update Q-value based on reward and learned value."""
         old_q = self.get_q_value(state, action)
         if next_state:
@@ -49,7 +56,7 @@ class LearningAgent:
             for next_action in next_available_moves:
                 # Simulate the player's next state after the opponent's move
                 simulated_state = list(next_state)
-                simulated_state[next_action] = self.player_type
+                simulated_state[next_action] = mark
                 simulated_state = "".join(simulated_state)
                 future_actions = get_available_moves(simulated_state)
                 if future_actions:

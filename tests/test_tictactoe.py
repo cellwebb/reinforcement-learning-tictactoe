@@ -180,11 +180,11 @@ def test_agent_learning():
     next_state = "X        "
 
     # Test winning scenario
-    agent.learn(state, action, 1.0, next_state)
+    agent.learn(state, action, 1.0, next_state, "X")
     assert agent.get_q_value(state, action) == 1.0
 
     # Test losing scenario
-    agent.learn(state, action, -1.0, next_state)
+    agent.learn(state, action, -1.0, next_state, "X")
     assert agent.get_q_value(state, action) == -1.0
 
 
@@ -297,7 +297,7 @@ def test_q_learning_edge_cases():
     assert agent.get_q_value(state, action) > 0
 
     # Test learning with empty next moves
-    agent.learn(state, action, 1.0, state)
+    agent.learn(state, action, 1.0, state, "X")
     assert agent.get_q_value(state, action) > 0
 
 
