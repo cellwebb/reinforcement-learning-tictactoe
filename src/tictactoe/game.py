@@ -1,4 +1,4 @@
-from .utils import get_available_moves, is_winner, is_draw
+from .utils import get_available_moves, is_winner, is_draw, opponent_can_win
 from .agents import LearningAgent, HumanPlayer
 
 
@@ -45,12 +45,16 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
         print(env)
 
     while True:
-        player = env.current_player
-        opponent = "O" if player == "X" else "X"
+        player_mark = env.current_player
+        opponent_mark = "O" if player_mark == "X" else "X"
 
         state = env.get_state()
         available_moves = get_available_moves(state)
-        action = players[player].choose_action(state, available_moves)
+
+        if not available_moves:
+            return "draw"
+
+        action = players[player_mark].choose_action(state, available_moves)
         env.make_move(action)
 
         if human_in_game:
@@ -58,27 +62,29 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
 
         new_state = env.get_state()
 
-        if is_winner(new_state, player):
-            if players[player].player_type == "agent":
-                players[player].learn(state, action, 1.0, done=True)
-            if players[opponent].player_type == "agent":
-                players[opponent].learn(
-                    env.state_history[-3], env.move_history[-2], -1.0, done=True
-                )
-            return player
+        if players[player_mark].player_type == "agent":
+            reward = 0
 
-        if is_draw(new_state):
-            if players[player].player_type == "agent":
-                players[player].learn(state, action, 0.5, done=True)
-            if players[opponent].player_type == "agent":
-                players[opponent].learn(env.state_history[-3], env.move_history[-2], 0.5, done=True)
-            return "draw"
+            if is_winner(new_state, player_mark):
+                reward = 1.0
+                players[player_mark].learn(state, action, 1.0, done=True)
+                return player_mark
 
-        if players[player].player_type == "agent":
-            players[player].learn(state, action, 0, new_state, player)
+            if is_draw(new_state):
+                reward = 0.5
+                players[player_mark].learn(state, action, 0.5, done=True)
+                return "draw"
+
+            # if opponent can win in the next move, reward the player with -1
+            if opponent_can_win(new_state, player_mark):
+                reward = -1.0
+                players[player_mark].learn(state, action, -1.0, done=True)
+                continue
+
+            players[player_mark].learn(state, action, reward, new_state, player_mark)
 
 
-def play_against_ai(ai_agent, human_plays_first: bool = True) -> None:
+def play_against_ai(ai_agent, human_plays_first: bool = True) -> str:
     """Play a game against an AI agent."""
     human = HumanPlayer()
 

@@ -27,3 +27,16 @@ def is_winner(state: str, player: str) -> bool:
 def is_draw(state: str) -> bool:
     """Check if the game is a draw."""
     return " " not in state
+
+
+@lru_cache(maxsize=19683)
+def opponent_can_win(state: str, player_mark: str) -> bool:
+    """Check if the opponent can win in the next move."""
+    opponent_mark = "O" if player_mark == "X" else "X"
+    for opponent_action in get_available_moves(state):
+        simulated_state = list(state)
+        simulated_state[opponent_action] = opponent_mark
+        simulated_state = "".join(simulated_state)
+        if is_winner(simulated_state, opponent_mark):
+            return True
+    return False

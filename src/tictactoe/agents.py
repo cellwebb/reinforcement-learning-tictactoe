@@ -33,6 +33,8 @@ class LearningAgent:
         self.q_table[(state, action)] = value
 
     def choose_action(self, state: str, available_moves: tuple[int]) -> int:
+        if not available_moves:
+            raise ValueError("No available moves")
         if random.random() < self.epsilon:
             return random.choice(available_moves)
         else:
@@ -51,10 +53,22 @@ class LearningAgent:
     ) -> None:
         """Update Q-value based on reward and learned value."""
         current_q = self.get_q_value(state, action)
-        if done:
-            learned_value = reward
-        elif next_state:
+
+        if done or next_state is None:
+            target_q = reward
+
+        else:
             opponent_mark = "O" if player_mark == "X" else "X"
+
+            # can opponent win in the next move?
+            for opponent_action in get_available_moves(next_state):
+                simulated_state = list(next_state)
+                simulated_state[opponent_action] = opponent_mark
+                simulated_state = "".join(simulated_state)
+
+                if is_winner(simulated_state, opponent_mark):
+                    target_q = -1.0
+                    break
 
             opponent_available_moves = get_available_moves(next_state)
             future_rewards = []
@@ -78,12 +92,10 @@ class LearningAgent:
                     )
                 )
             if future_rewards:
-                learned_value = reward + self.gamma * max(future_rewards)
+                target_q = reward + self.gamma * max(future_rewards)
             else:
-                learned_value = reward
-        else:
-            learned_value = reward
-        new_q = current_q + self.alpha * (learned_value - current_q)
+                target_q = reward
+        new_q = current_q + self.alpha * (target_q - current_q)
         self.update_q_value(state, action, new_q)
 
     def save_policy(self, filename: str = None) -> None:
