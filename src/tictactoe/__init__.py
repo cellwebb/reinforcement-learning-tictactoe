@@ -203,9 +203,15 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
             players[player].learn(state, action, 0, new_state, get_available_moves(new_state))
 
 
-def play_against_ai(ai_agent, human_plays_first: bool = True) -> None:
-    """Play a game against the AI agent."""
+def play_against_ai(
+    ai_agent, human_plays_first: bool = True, turn_off_exploration: bool = True
+) -> None:
+    """Play a game against an AI agent."""
     human = HumanPlayer()
+
+    if turn_off_exploration:
+        stored_epsilon = ai_agent.epsilon
+        ai_agent.epsilon = 0
 
     print("Game starting! Positions are numbered 0-8, left to right, top to bottom")
 
@@ -220,6 +226,9 @@ def play_against_ai(ai_agent, human_plays_first: bool = True) -> None:
         print("You win!")
     else:
         print("AI wins!")
+
+    if turn_off_exploration:
+        ai_agent.epsilon = stored_epsilon
 
     return result
 
