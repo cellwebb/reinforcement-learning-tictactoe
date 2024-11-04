@@ -2,6 +2,7 @@ import time
 from .agents import LearningAgent
 from .game import play_game
 import random
+from tqdm import tqdm  # Add tqdm import
 
 
 def train(
@@ -28,7 +29,7 @@ def train(
 
     start_time = time.time()
 
-    for _ in range(num_episodes):
+    for _ in tqdm(range(num_episodes), desc="Training Progress"):  # Add tqdm to the loop
         if switch_sides or random.random() < 0.5:
             result = play_game(agent1, agent2)
 
