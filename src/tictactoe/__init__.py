@@ -87,7 +87,7 @@ class LearningAgent:
     def update_q_value(self, state: tuple[str], action: int, value: float) -> None:
         self.q_table[(state, action)] = value
 
-    def choose_action(self, state: tuple[str], available_moves: list[int]) -> int:
+    def choose_action(self, state: tuple[str], available_moves: tuple[int]) -> int:
         if random.random() < self.epsilon:
             return random.choice(available_moves)
         else:
@@ -171,14 +171,11 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
     if human_in_game:
         print(env)
 
-    state = env.get_state()
-    prev_state = None
-    prev_action = None
-
     while True:
         player = env.current_player
         opponent = "O" if player == "X" else "X"
 
+        state = env.get_state()
         available_moves = get_available_moves(state)
         action = players[player].choose_action(state, available_moves)
         env.make_move(action)
@@ -186,24 +183,24 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
         if human_in_game:
             print(env)
 
-        next_state = env.get_state()
+        new_state = env.get_state()
 
-        if is_winner(next_state, player):
+        if is_winner(new_state, player):
             if players[player].player_type == "agent":
                 players[player].update_q_value(state, action, 1.0)
             if players[opponent].player_type == "agent":
-                players[opponent].update_q_value(prev_state, action, -1.0)
+                players[opponent].update_q_value(env.state_history[-3], env.move_history[-3], -1.0)
             return player
 
-        if is_draw(next_state):
-            for p in ["X", "O"]:
-                if players[p].player_type == "agent":
-                    players[p].learn(state, action, 0.5, next_state, ())
+        if is_draw(new_state):
+            if players[player].player_type == "agent":
+                players[player].update_q_value(state, action, 0.5)
+            if players[opponent].player_type == "agent":
+                players[opponent].update_q_value(env.state_history[-3], env.move_history[-3], 0.5)
             return "draw"
 
         if players[player].player_type == "agent":
-            players[player].learn(state, action, 0, next_state, get_available_moves(next_state))
-        state = next_state
+            players[player].learn(state, action, 0, new_state, get_available_moves(new_state))
 
 
 def play_against_ai(ai_agent, human_plays_first: bool = True) -> None:
