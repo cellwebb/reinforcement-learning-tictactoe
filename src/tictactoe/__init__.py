@@ -1,3 +1,5 @@
+# flake8: noqa: F401
+
 import random
 import json
 import yaml
@@ -8,7 +10,6 @@ from .game import TicTacToe, play_game, play_against_ai
 from .agents import LearningAgent, HumanPlayer
 from .training import train
 from .cli import cli
-
 
 if __name__ == "__main__":
     cli()
