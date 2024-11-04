@@ -60,16 +60,18 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
 
         if is_winner(new_state, player):
             if players[player].player_type == "agent":
-                players[player].learn(state, action, 1.0)
+                players[player].learn(state, action, 1.0, done=True)
             if players[opponent].player_type == "agent":
-                players[opponent].learn(env.state_history[-3], env.move_history[-2], -1.0)
+                players[opponent].learn(
+                    env.state_history[-3], env.move_history[-2], -1.0, done=True
+                )
             return player
 
         if is_draw(new_state):
             if players[player].player_type == "agent":
-                players[player].learn(state, action, 0.5)
+                players[player].learn(state, action, 0.5, done=True)
             if players[opponent].player_type == "agent":
-                players[opponent].learn(env.state_history[-3], env.move_history[-2], 0.5)
+                players[opponent].learn(env.state_history[-3], env.move_history[-2], 0.5, done=True)
             return "draw"
 
         if players[player].player_type == "agent":

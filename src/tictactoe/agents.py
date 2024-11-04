@@ -1,6 +1,6 @@
 import random
 import json
-from .utils import get_available_moves
+from .utils import get_available_moves, is_winner, is_draw
 
 
 class LearningAgent:
@@ -45,34 +45,46 @@ class LearningAgent:
         state: str,
         action: int,
         reward: float,
+        done: bool = False,  # whether the game is over
         next_state: str | None = None,
-        mark: str = None,
+        player_mark: str = None,
     ) -> None:
         """Update Q-value based on reward and learned value."""
-        old_q = self.get_q_value(state, action)
-        if next_state:
-            next_available_moves = get_available_moves(next_state)
+        current_q = self.get_q_value(state, action)
+        if done:
+            learned_value = reward
+        elif next_state:
+            opponent_mark = "O" if player_mark == "X" else "X"
+
+            opponent_available_moves = get_available_moves(next_state)
             future_rewards = []
-            for next_action in next_available_moves:
-                # Simulate the player's next state after the opponent's move
+            for opponent_action in opponent_available_moves:
                 simulated_state = list(next_state)
-                simulated_state[next_action] = mark
+                simulated_state[opponent_action] = opponent_mark
                 simulated_state = "".join(simulated_state)
-                future_actions = get_available_moves(simulated_state)
-                if future_actions:
-                    future_rewards.append(
-                        max(
-                            self.get_q_value(simulated_state, future_action)
-                            for future_action in future_actions
-                        )
+
+                if is_winner(simulated_state, opponent_mark):
+                    future_rewards.append(-1.0)
+                    continue
+                elif is_draw(simulated_state):
+                    future_rewards.append(0.5)
+                    continue
+
+                player_future_actions = get_available_moves(simulated_state)
+                future_rewards.append(
+                    max(
+                        self.get_q_value(simulated_state, future_action)
+                        for future_action in player_future_actions
                     )
+                )
             if future_rewards:
                 learned_value = reward + self.gamma * max(future_rewards)
             else:
                 learned_value = reward
         else:
             learned_value = reward
-        self.update_q_value(state, action, old_q + self.alpha * (learned_value - old_q))
+        new_q = current_q + self.alpha * (learned_value - current_q)
+        self.update_q_value(state, action, new_q)
 
     def save_policy(self, filename: str = None) -> None:
         """Save the Q-table to a file."""
