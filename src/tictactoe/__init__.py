@@ -27,18 +27,16 @@ class TicTacToe:
     def __init__(self, starting_player: str = "X"):
         self.board = [" " for _ in range(9)]
         self.current_player = starting_player
-        self.moves = []
+        self.move_order = []
 
-    def get_available_moves(self) -> list[int]:
-        """Get list of empty positions."""
-        return list(get_available_moves(self.get_state()))
+    # Remove get_available_moves method
 
     def make_move(self, position: int) -> None:
         if self.board[position] != " ":
             raise ValueError("Invalid move")
         self.board[position] = self.current_player
         self.current_player = "O" if self.current_player == "X" else "X"
-        self.moves.append(position)
+        self.move_order.append(position)
 
     def is_winner(self, player: str) -> bool:
         return any(all(self.board[i] == player for i in condition) for condition in WIN_CONDITIONS)
@@ -97,7 +95,7 @@ class LearningAgent:
         action: int,
         reward: float,
         next_state: tuple[str],
-        next_available_moves: Optional[list[int]],
+        next_available_moves: tuple[int, ...],
     ) -> None:
         """Update Q-value based on reward and learned value."""
         old_q = self.get_q_value(state, action)
@@ -172,7 +170,7 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
         player = env.current_player
         opponent = "O" if player == "X" else "X"
 
-        available_moves = env.get_available_moves()
+        available_moves = list(get_available_moves(env.get_state()))
         action = players[player].choose_action(state, available_moves)
         env.make_move(action)
 
@@ -185,17 +183,17 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
             if players[player].player_type == "agent":
                 players[player].update_q_value(state, action, 1)
             if players[opponent].player_type == "agent":
-                players[opponent].learn(state, action, -1, next_state, [])
+                players[opponent].learn(state, action, -1, next_state, ())
             return player
 
         if env.is_draw():
             for p in ["X", "O"]:
                 if players[p].player_type == "agent":
-                    players[p].learn(state, action, 0.5, next_state, [])
+                    players[p].learn(state, action, 0.5, next_state, ())
             return "draw"
 
         if players[player].player_type == "agent":
-            players[player].learn(state, action, 0, next_state, env.get_available_moves())
+            players[player].learn(state, action, 0, next_state, get_available_moves(next_state))
         state = next_state
 
 

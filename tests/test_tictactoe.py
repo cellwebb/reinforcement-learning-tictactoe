@@ -18,9 +18,9 @@ def test_initial_state(game):
 
 def test_get_available_moves(game):
     """Test that the available moves are returned correctly."""
-    assert game.get_available_moves() == list(range(9))
+    assert list(get_available_moves(game.get_state())) == list(range(9))
     game.make_move(0)
-    assert game.get_available_moves() == list(range(1, 9))
+    assert list(get_available_moves(game.get_state())) == list(range(1, 9))
 
 
 def test_make_move(game):
@@ -176,11 +176,11 @@ def test_agent_learning():
     next_state = ("X", " ", " ", " ", " ", " ", " ", " ", " ")
 
     # Test winning scenario
-    agent.learn(state, action, 1.0, next_state, [])
+    agent.learn(state, action, 1.0, next_state, ())
     assert agent.get_q_value(state, action) == 1.0
 
     # Test losing scenario
-    agent.learn(state, action, -1.0, next_state, [])
+    agent.learn(state, action, -1.0, next_state, ())
     assert agent.get_q_value(state, action) == -1.0
 
 
