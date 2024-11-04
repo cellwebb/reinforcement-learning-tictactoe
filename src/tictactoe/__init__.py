@@ -234,7 +234,8 @@ def train(
     agent2: LearningAgent = None,
     num_episodes: int = 100,
     single_agent_training: bool = False,
-    save_policy: bool = True,
+    agent1_policy_file: str = None,
+    agent2_policy_file: str = None,
 ) -> None:
     """Train two agents to play Tic-Tac-Toe against each other."""
 
@@ -274,10 +275,10 @@ def train(
     print(f"Results: {results}")
     print(f"Wins: {wins}")
 
-    if save_policy:
-        agent1.save_policy("agent1.json")
-        if not single_agent_training:
-            agent2.save_policy("agent2.json")
+    if agent1_policy_file:
+        agent1.save_policy(agent1_policy_file)
+    if agent2_policy_file:
+        agent2.save_policy(agent2_policy_file)
 
 
 def cli():
@@ -293,6 +294,8 @@ def cli():
     parser.add_argument("--alpha", type=float, default=0.1, help="Learning rate")
     parser.add_argument("--gamma", type=float, default=0.9, help="Discount factor")
     parser.add_argument("--epsilon", type=float, default=0.1, help="Exploration rate")
+    parser.add_argument("--agent1", type=str, help="Policy file for agent 1")
+    parser.add_argument("--agent2", type=str, help="Policy file for agent 2")
     parser.add_argument("--policy", type=str, help="Policy file for loading/saving")
     parser.add_argument("--ai-first", action="store_true", help="AI plays first")
 
@@ -301,6 +304,8 @@ def cli():
     if args.train:
         agent = LearningAgent(epsilon=args.epsilon)
         train(agent1=agent, num_episodes=args.n_episodes)
+        if args.policy:
+            agent.save_policy(args.policy)
     else:  # play
         if not args.policy:
             print("Error: --policy required for play mode")
