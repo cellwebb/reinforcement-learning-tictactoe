@@ -1,6 +1,6 @@
 import pytest
 from tictactoe import TicTacToe, LearningAgent
-import random  # New import
+import random
 
 
 @pytest.fixture
