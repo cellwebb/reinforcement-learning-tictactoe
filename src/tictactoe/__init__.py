@@ -15,20 +15,20 @@ WIN_CONDITIONS = [
 
 
 @lru_cache(maxsize=19683)  # 3^9 possible board states
-def get_available_moves(board: tuple[str, ...]) -> tuple[int, ...]:
+def get_available_moves(state: str) -> tuple[int, ...]:
     """Get available moves for a given board state."""
-    return tuple(i for i, mark in enumerate(board) if mark == " ")
+    return tuple(i for i, mark in enumerate(state) if mark == " ")
 
 
 @lru_cache(maxsize=19683)
-def is_winner(board: tuple[str, ...], player: str) -> bool:
+def is_winner(state: str, player: str) -> bool:
     """Check if the given player has won."""
-    return any(all(board[i] == player for i in condition) for condition in WIN_CONDITIONS)
+    return any(all(state[i] == player for i in condition) for condition in WIN_CONDITIONS)
 
 
-def is_draw(board: tuple[str, ...]) -> bool:
+def is_draw(state: str) -> bool:
     """Check if the game is a draw."""
-    return " " not in board
+    return " " not in state
 
 
 class TicTacToe:
@@ -49,8 +49,7 @@ class TicTacToe:
         self.state_history.append(self.get_state())
 
     def get_state(self) -> tuple[str]:
-        # TODO: Implement a more efficient state representation
-        return tuple(self.board)
+        return "".join(self.board)
 
     def __str__(self):
         return (
@@ -80,13 +79,13 @@ class LearningAgent:
 
         self.player_type = "agent"
 
-    def get_q_value(self, state: tuple[str], action: int) -> float:
+    def get_q_value(self, state: str, action: int) -> float:
         return self.q_table.get((state, action), 1.0)
 
-    def update_q_value(self, state: tuple[str], action: int, value: float) -> None:
+    def update_q_value(self, state: str, action: int, value: float) -> None:
         self.q_table[(state, action)] = value
 
-    def choose_action(self, state: tuple[str], available_moves: tuple[int]) -> int:
+    def choose_action(self, state: str, available_moves: tuple[int]) -> int:
         if random.random() < self.epsilon:
             return random.choice(available_moves)
         else:
@@ -96,10 +95,10 @@ class LearningAgent:
 
     def learn(
         self,
-        state: tuple[str],
+        state: str,
         action: int,
         reward: float,
-        next_state: tuple[str] | None = None,
+        next_state: str | None = None,
         next_available_moves: tuple[int, ...] | None = None,
     ) -> None:
         """Update Q-value based on reward and learned value."""
@@ -128,14 +127,13 @@ class LearningAgent:
                 self._deserialize_key(key): value for key, value in serialized_q_table.items()
             }
 
-    def _serialize_key(self, state: tuple[str], action: int) -> str:
+    def _serialize_key(self, state: str, action: int) -> str:
         """Convert a state-action pair to a string key."""
         return f"{state}_{action}"
 
-    def _deserialize_key(self, key: str) -> tuple[tuple[str], int]:
+    def _deserialize_key(self, key: str) -> tuple[str, int]:
         """Convert a string key back to state-action pair."""
-        state_str, action = key.rsplit("_", 1)
-        state = eval(state_str)  # Safe since we control the input format
+        state, action = key.rsplit("_", 1)
         return state, int(action)
 
 
@@ -145,7 +143,7 @@ class HumanPlayer:
     def __init__(self):
         self.player_type = "human"
 
-    def choose_action(self, state: tuple[str], available_moves: list[int]) -> int:
+    def choose_action(self, state: str, available_moves: list[int]) -> int:
         """Get move from human player via console input."""
 
         while True:

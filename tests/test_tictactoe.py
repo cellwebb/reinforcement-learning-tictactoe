@@ -40,37 +40,36 @@ def test_make_invalid_move(game):
 
 
 @pytest.mark.parametrize(
-    "board,player,expected",
+    "state,player,expected",
     [
-        (("X", "X", "X", " ", " ", " ", " ", " ", " "), "X", True),  # Horizontal win
-        (("O", " ", " ", "O", " ", " ", "O", " ", " "), "O", True),  # Vertical win
-        (("X", " ", " ", " ", "X", " ", " ", " ", "X"), "X", True),  # Diagonal win
-        (("O", "X", "O", "X", "O", "X", "X", "O", "X"), "O", False),  # No win
+        ("XXX      ", "X", True),  # Horizontal win
+        ("O  O  O  ", "O", True),  # Vertical win
+        ("X   X   X", "X", True),  # Diagonal win
+        ("OXOXOXXOX", "O", False),  # No win
     ],
 )
-def test_is_winner(board, player, expected):
+def test_is_winner(state, player, expected):
     """Test various win conditions."""
-    assert is_winner(board, player) == expected
+    assert is_winner(state, player) == expected
 
 
 @pytest.mark.parametrize(
-    "board,expected",
+    "state,expected",
     [
-        (["X", "O", "X", "X", "O", "O", "O", "X", "X"], True),  # Full board
-        (["X", "O", "X", " ", "O", "O", "O", "X", "X"], False),  # Not full
+        ("XOXXOOOXX", True),  # Full board
+        ("XOX OO OX", False),  # Not full
     ],
 )
-def test_is_draw(board, expected):
+def test_is_draw(state, expected):
     """Test draw conditions."""
-    board_tuple = tuple(board)
-    assert is_draw(board_tuple) == expected
+    assert is_draw(state) == expected
 
 
 def test_get_state(game):
     """Test that the game state is returned correctly."""
-    assert game.get_state() == tuple([" "] * 9)
+    assert game.get_state() == "         "
     game.make_move(0)
-    assert game.get_state() == ("X", " ", " ", " ", " ", " ", " ", " ", " ")
+    assert game.get_state() == "X        "
 
 
 # Learning Agent Tests
@@ -84,7 +83,7 @@ def test_agent_initialization(agent):
 
 def test_agent_get_q_value(agent):
     """Test Q-value retrieval."""
-    state = tuple([" "] * 9)
+    state = "         "
     action = 0
     assert agent.get_q_value(state, action) == 1.0
     agent.update_q_value(state, action, 0.0)
@@ -94,7 +93,7 @@ def test_agent_get_q_value(agent):
 def test_agent_choose_action_exploitation():
     """Test that agent chooses best action when epsilon=0."""
     agent = LearningAgent(epsilon=0)
-    state = tuple([" "] * 9)
+    state = "         "
     available_moves = [0, 1, 2]
     agent.update_q_value(state, 0, 1.0)
     agent.update_q_value(state, 1, 0.5)
@@ -105,7 +104,7 @@ def test_agent_choose_action_exploitation():
 def test_agent_policy_save_load(tmp_path):
     """Test policy saving and loading."""
     agent = LearningAgent()
-    state = tuple([" "] * 9)
+    state = "         "
     action = 0
     agent.update_q_value(state, action, 1.0)
 
@@ -122,7 +121,7 @@ def test_agent_policy_save_load(tmp_path):
 def test_human_valid_move(mock_input):
     """Test valid human move."""
     player = HumanPlayer()
-    state = tuple([" "] * 9)
+    state = "         "
     available_moves = [4, 5, 6]
     assert player.choose_action(state, available_moves) == 4
 
@@ -131,7 +130,7 @@ def test_human_valid_move(mock_input):
 def test_human_invalid_then_valid_move(mock_input):
     """Test invalid moves followed by valid move."""
     player = HumanPlayer()
-    state = tuple([" "] * 9)
+    state = "         "
     available_moves = [4, 5, 6]
     assert player.choose_action(state, available_moves) == 5
 
@@ -172,9 +171,9 @@ def test_play_against_ai_ai_first(mock_input):
 def test_agent_learning():
     """Test that agent actually learns from experience."""
     agent = LearningAgent(alpha=1.0, gamma=1.0, epsilon=0)
-    state = tuple([" "] * 9)
+    state = "         "
     action = 0
-    next_state = ("X", " ", " ", " ", " ", " ", " ", " ", " ")
+    next_state = "X        "
 
     # Test winning scenario
     agent.learn(state, action, 1.0, next_state, ())
@@ -201,7 +200,7 @@ def test_train_function():
 def test_cached_get_available_moves():
     """Test the cached get_available_moves function."""
     # Test with empty board
-    empty_board = tuple(" " * 9)
+    empty_board = "         "
     assert get_available_moves(empty_board) == tuple(range(9))
 
     # Test cache hit (same result object)
@@ -210,24 +209,24 @@ def test_cached_get_available_moves():
     assert result1 is result2
 
     # Test with partially filled board
-    partial_board = ("X", "O", " ", " ", "X", " ", "O", " ", " ")
+    partial_board = "XO  X O  "
     assert get_available_moves(partial_board) == (2, 3, 5, 7, 8)
 
     # Test full board
-    full_board = ("X", "O") * 4 + ("X",)
+    full_board = "XOXOXOXOX"
     assert get_available_moves(full_board) == tuple()
 
     # Test single move board
-    single_move = ("X",) + tuple(" " * 8)
+    single_move = "X        "
     assert len(get_available_moves(single_move)) == 8
 
 
 def test_str_representation():
     """Test string representation functions."""
     # Test board state formatting
-    board = ("X", "O", " ", " ", "X", " ", "O", " ", " ")
+    board = list("XO  X O  ")
     game = TicTacToe()
-    game.board = list(board)
+    game.board = board
 
     # Check board display format
     expected = "\n\n X | O |   \n-----------\n   | X |   \n-----------\n O |   |   \n\n"
@@ -236,10 +235,10 @@ def test_str_representation():
 
 def test_cached_is_winner():
     """Test the cached is_winner function."""
-    empty_board = tuple(" " * 9)
+    empty_board = "         "
     assert not is_winner(empty_board, "X")
 
-    winning_board = ("X", "X", "X", " ", " ", " ", " ", " ", " ")
+    winning_board = "XXX      "
     assert is_winner(winning_board, "X")
 
     # Test cache hit (same result object)
@@ -250,10 +249,10 @@ def test_cached_is_winner():
 
 def test_cached_is_draw():
     """Test the cached is_draw function."""
-    empty_board = tuple(" " * 9)
+    empty_board = "         "
     assert not is_draw(empty_board)
 
-    draw_board = ("X", "O", "X", "O", "X", "O", "O", "X", "O")
+    draw_board = "XOXOXOXOX"
     assert is_draw(draw_board)
 
     # Test cache hit (same result object)
@@ -285,7 +284,7 @@ def test_play_against_ai_returns_none():
 def test_q_learning_edge_cases():
     """Test Q-learning in edge cases."""
     agent = LearningAgent()
-    state = tuple([" "] * 9)
+    state = "         "
     action = 0
 
     # Test learning with no next state
@@ -321,7 +320,7 @@ def test_state_history_tracking():
 def test_agent_serialization_roundtrip():
     """Test complete serialization/deserialization cycle."""
     agent = LearningAgent()
-    state = tuple([" "] * 9)
+    state = "         "
     action = 0
     value = 0.5
 
@@ -350,8 +349,8 @@ def test_multiple_game_outcomes():
 
 def test_cached_functions_consistency():
     """Test that cached functions maintain consistency."""
-    board1 = tuple([" "] * 9)
-    board2 = tuple([" "] * 9)
+    board1 = "         "
+    board2 = "         "
 
     # Test get_available_moves cache
     moves1 = get_available_moves(board1)
@@ -369,8 +368,8 @@ def test_cli_train(tmp_path, monkeypatch, capsys):
     import sys
     from tictactoe import cli
 
-    # Mock argv
-    test_args = ["tictactoe", "--train", "--n-episodes=10", "--epsilon=0.05"]
+    # Mock argv with the 'train' command
+    test_args = ["tictactoe", "train", "--num-episodes=10", "--epsilon=0.05"]
     monkeypatch.setattr(sys, "argv", test_args)
 
     # Run CLI
@@ -387,10 +386,12 @@ def test_cli_play_missing_policy(capsys):
     import sys
     from tictactoe import cli
 
-    with patch.object(sys, "argv", ["tictactoe", "--play"]):
-        cli()
+    # Mock argv with the 'play' command but without '--policy'
+    with patch.object(sys, "argv", ["tictactoe", "play"]):
+        with pytest.raises(SystemExit) as excinfo:
+            cli()
         captured = capsys.readouterr()
-        assert "Error: --policy required for play mode" in captured.out
+        assert "the following arguments are required: --policy" in captured.err
 
 
 def test_cli_play_nonexistent_policy(capsys):
@@ -398,14 +399,15 @@ def test_cli_play_nonexistent_policy(capsys):
     import sys
     from tictactoe import cli
 
-    with patch.object(sys, "argv", ["tictactoe", "--play", "--policy=nonexistent.json"]):
+    # Mock argv with the 'play' command and a nonexistent policy file
+    with patch.object(sys, "argv", ["tictactoe", "play", "--policy=nonexistent.json"]):
         cli()
         captured = capsys.readouterr()
         assert "Error: Policy file 'nonexistent.json' not found" in captured.out
 
 
-def test_cli_play_valid(tmp_path):
-    """Test CLI play mode with valid policy."""
+def test_cli_play_valid(tmp_path, random_move_generator):
+    """Test CLI play mode with valid policy using a random move generator."""
     import sys
     from tictactoe import cli
 
@@ -414,7 +416,7 @@ def test_cli_play_valid(tmp_path):
     policy_file = tmp_path / "test_policy.json"
     agent.save_policy(str(policy_file))
 
-    # Mock input for gameplay
-    with patch("builtins.input", side_effect=["0", "1", "2", "3", "4"]):
-        with patch.object(sys, "argv", ["tictactoe", "--play", f"--policy={policy_file}"]):
+    # Mock input for gameplay with the generator fixture and suppress print
+    with patch("builtins.input", side_effect=random_move_generator), patch("builtins.print"):
+        with patch.object(sys, "argv", ["tictactoe", "play", f"--policy={policy_file}"]):
             cli()  # Should complete without errors
