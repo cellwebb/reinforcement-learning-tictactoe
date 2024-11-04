@@ -1,5 +1,11 @@
 import random
-from .utils import get_available_moves, is_winner, is_draw, opponent_can_win, opponent_can_draw
+from .utils import (
+    get_available_moves,
+    is_winner,
+    is_draw,
+    opponent_wins_next_turn,
+    opponent_can_draw,
+)
 from .agents import LearningAgent, HumanPlayer
 
 
@@ -82,7 +88,7 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
                 players[player_mark].learn(state, action, reward, done=True)
                 return "draw"
 
-            if opponent_can_win(new_state, player_mark):
+            if opponent_wins_next_turn(new_state, player_mark):
                 reward = -1
                 players[player_mark].learn(state, action, reward, done=True)
             elif opponent_can_draw(new_state):

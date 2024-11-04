@@ -342,8 +342,8 @@ def test_multiple_game_outcomes():
     agent1 = LearningAgent(epsilon=0.5)
     agent2 = LearningAgent(epsilon=0.5)
 
-    # Play multiple games to ensure we see all possible outcomes
-    for _ in range(10):
+    # Play more games to ensure we see all possible outcomes
+    for _ in range(1000):
         outcome = play_game(agent1, agent2)
         outcomes.add(outcome)
 

@@ -27,7 +27,7 @@ class LearningAgent:
         self.player_type = "agent"
 
     def get_q_value(self, state: str, action: int) -> float:
-        return self.q_table.get((state, action), random.random() * 2 - 1)
+        return self.q_table.get((state, action), 0.0)
 
     def update_q_value(self, state: str, action: int, value: float) -> None:
         self.q_table[(state, action)] = value
@@ -57,12 +57,12 @@ class LearningAgent:
 
         if done or next_state is None:
             target_q = reward
-
         else:
             opponent_mark = "O" if player_mark == "X" else "X"
+            opponent_available_moves = get_available_moves(next_state)
 
             # can opponent win in the next move?
-            for opponent_action in get_available_moves(next_state):
+            for opponent_action in opponent_available_moves:
                 simulated_state = list(next_state)
                 simulated_state[opponent_action] = opponent_mark
                 simulated_state = "".join(simulated_state)
@@ -70,32 +70,32 @@ class LearningAgent:
                 if is_winner(simulated_state, opponent_mark):
                     target_q = -1.0
                     break
-
-            opponent_available_moves = get_available_moves(next_state)
-            future_rewards = []
-            for opponent_action in opponent_available_moves:
-                simulated_state = list(next_state)
-                simulated_state[opponent_action] = opponent_mark
-                simulated_state = "".join(simulated_state)
-
-                if is_winner(simulated_state, opponent_mark):
-                    future_rewards.append(-1.0)
-                    continue
-                elif is_draw(simulated_state):
-                    future_rewards.append(0.5)
-                    continue
-
-                player_future_actions = get_available_moves(simulated_state)
-                future_rewards.append(
-                    max(
-                        self.get_q_value(simulated_state, future_action)
-                        for future_action in player_future_actions
-                    )
-                )
-            if future_rewards:
-                target_q = reward + self.gamma * max(future_rewards)
             else:
-                target_q = reward
+                future_rewards = []
+                for opponent_action in opponent_available_moves:
+                    simulated_state = list(next_state)
+                    simulated_state[opponent_action] = opponent_mark
+                    simulated_state = "".join(simulated_state)
+
+                    if is_winner(simulated_state, opponent_mark):
+                        future_rewards.append(-1.0)
+                        continue
+                    elif is_draw(simulated_state):
+                        future_rewards.append(0.5)
+                        continue
+
+                    player_future_actions = get_available_moves(simulated_state)
+                    future_rewards.append(
+                        max(
+                            self.get_q_value(simulated_state, future_action)
+                            for future_action in player_future_actions
+                        )
+                    )
+                if future_rewards:
+                    target_q = reward + self.gamma * max(future_rewards)
+                else:
+                    target_q = reward
+
         new_q = current_q + self.alpha * (target_q - current_q)
         self.update_q_value(state, action, new_q)
 
