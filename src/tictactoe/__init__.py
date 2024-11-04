@@ -203,15 +203,12 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
             players[player].learn(state, action, 0, new_state, get_available_moves(new_state))
 
 
-def play_against_ai(
-    ai_agent, human_plays_first: bool = True, turn_off_exploration: bool = True
-) -> None:
+def play_against_ai(ai_agent, human_plays_first: bool = True) -> None:
     """Play a game against an AI agent."""
     human = HumanPlayer()
 
-    if turn_off_exploration:
-        stored_epsilon = ai_agent.epsilon
-        ai_agent.epsilon = 0
+    stored_epsilon = ai_agent.epsilon
+    ai_agent.epsilon = 0
 
     print("Game starting! Positions are numbered 0-8, left to right, top to bottom")
 
@@ -227,8 +224,7 @@ def play_against_ai(
     else:
         print("AI wins!")
 
-    if turn_off_exploration:
-        ai_agent.epsilon = stored_epsilon
+    ai_agent.epsilon = stored_epsilon
 
     return result
 
@@ -284,5 +280,38 @@ def train(
             agent2.save_policy("agent2.json")
 
 
+def cli():
+    """Command line interface for the Tic-Tac-Toe game."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Tic-Tac-Toe with Q-Learning")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--train", action="store_true", help="Train the AI agent")
+    group.add_argument("--play", action="store_true", help="Play against the AI agent")
+
+    parser.add_argument("--n-episodes", type=int, default=100, help="Number of training episodes")
+    parser.add_argument("--alpha", type=float, default=0.1, help="Learning rate")
+    parser.add_argument("--gamma", type=float, default=0.9, help="Discount factor")
+    parser.add_argument("--epsilon", type=float, default=0.1, help="Exploration rate")
+    parser.add_argument("--policy", type=str, help="Policy file for loading/saving")
+    parser.add_argument("--ai-first", action="store_true", help="AI plays first")
+
+    args = parser.parse_args()
+
+    if args.train:
+        agent = LearningAgent(epsilon=args.epsilon)
+        train(agent1=agent, num_episodes=args.n_episodes)
+    else:  # play
+        if not args.policy:
+            print("Error: --policy required for play mode")
+            return
+        try:
+            agent = LearningAgent(policy_file=args.policy, epsilon=0)  # No exploration during play
+            play_against_ai(agent, human_plays_first=not args.ai_first)
+        except FileNotFoundError:
+            print(f"Error: Policy file '{args.policy}' not found")
+            return
+
+
 if __name__ == "__main__":
-    train()
+    cli()

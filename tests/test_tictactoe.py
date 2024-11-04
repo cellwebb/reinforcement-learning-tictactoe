@@ -362,3 +362,59 @@ def test_cached_functions_consistency():
     result1 = is_winner(board1, "X")
     result2 = is_winner(board2, "X")
     assert result1 is result2  # Should return same cached object
+
+
+def test_cli_train(tmp_path, monkeypatch, capsys):
+    """Test CLI training mode."""
+    import sys
+    from tictactoe import cli
+
+    # Mock argv
+    test_args = ["tictactoe", "--train", "--n-episodes=10", "--epsilon=0.05"]
+    monkeypatch.setattr(sys, "argv", test_args)
+
+    # Run CLI
+    cli()
+
+    # Check output
+    captured = capsys.readouterr()
+    assert "Results:" in captured.out
+    assert "Wins:" in captured.out
+
+
+def test_cli_play_missing_policy(capsys):
+    """Test CLI play mode with missing policy file."""
+    import sys
+    from tictactoe import cli
+
+    with patch.object(sys, "argv", ["tictactoe", "--play"]):
+        cli()
+        captured = capsys.readouterr()
+        assert "Error: --policy required for play mode" in captured.out
+
+
+def test_cli_play_nonexistent_policy(capsys):
+    """Test CLI play mode with nonexistent policy file."""
+    import sys
+    from tictactoe import cli
+
+    with patch.object(sys, "argv", ["tictactoe", "--play", "--policy=nonexistent.json"]):
+        cli()
+        captured = capsys.readouterr()
+        assert "Error: Policy file 'nonexistent.json' not found" in captured.out
+
+
+def test_cli_play_valid(tmp_path):
+    """Test CLI play mode with valid policy."""
+    import sys
+    from tictactoe import cli
+
+    # Create a temporary policy file
+    agent = LearningAgent()
+    policy_file = tmp_path / "test_policy.json"
+    agent.save_policy(str(policy_file))
+
+    # Mock input for gameplay
+    with patch("builtins.input", side_effect=["0", "1", "2", "3", "4"]):
+        with patch.object(sys, "argv", ["tictactoe", "--play", f"--policy={policy_file}"]):
+            cli()  # Should complete without errors

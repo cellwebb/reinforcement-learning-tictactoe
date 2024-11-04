@@ -16,6 +16,9 @@ dev = [
     "isort>=5.13.2",
 ]
 
+[project.scripts]
+tictactoe = "tictactoe:cli"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
