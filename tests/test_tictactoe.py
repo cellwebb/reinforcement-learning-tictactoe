@@ -260,3 +260,105 @@ def test_cached_is_draw():
     result1 = is_draw(draw_board)
     result2 = is_draw(draw_board)
     assert result1 is result2
+
+
+def test_learning_agent_str_loading():
+    """Test loading agent from non-existent file gracefully fails."""
+    with pytest.raises(FileNotFoundError):
+        LearningAgent(policy_file="nonexistent.json")
+
+
+def test_human_player_type():
+    """Test human player type attribute."""
+    player = HumanPlayer()
+    assert player.player_type == "human"
+
+
+def test_play_against_ai_returns_none():
+    """Test play_against_ai function returns correctly."""
+    ai_agent = LearningAgent(epsilon=0)
+    with patch("builtins.input", side_effect=["0", "1", "2", "3", "4", "5", "6", "7", "8"]):
+        result = play_against_ai(ai_agent, human_plays_first=True)
+        assert result in ["X", "O", "draw"]
+
+
+def test_q_learning_edge_cases():
+    """Test Q-learning in edge cases."""
+    agent = LearningAgent()
+    state = tuple([" "] * 9)
+    action = 0
+
+    # Test learning with no next state
+    agent.learn(state, action, 1.0)
+    assert agent.get_q_value(state, action) > 0
+
+    # Test learning with empty next moves
+    agent.learn(state, action, 1.0, state, tuple())
+    assert agent.get_q_value(state, action) > 0
+
+
+def test_main_with_different_episodes():
+    """Test main function with different episode counts."""
+    with patch("random.random", return_value=0.4):
+        with patch("tictactoe.play_game", return_value="X"):
+            from tictactoe import main
+
+            with patch("builtins.print"):  # Suppress output
+                main()  # Should complete without errors
+
+
+def test_state_history_tracking():
+    """Test game state history tracking."""
+    game = TicTacToe()
+    assert len(game.state_history) == 1
+    assert len(game.move_history) == 0
+
+    game.make_move(0)
+    assert len(game.state_history) == 2
+    assert len(game.move_history) == 1
+
+
+def test_agent_serialization_roundtrip():
+    """Test complete serialization/deserialization cycle."""
+    agent = LearningAgent()
+    state = tuple([" "] * 9)
+    action = 0
+    value = 0.5
+
+    agent.update_q_value(state, action, value)
+    key = agent._serialize_key(state, action)
+    restored_state, restored_action = agent._deserialize_key(key)
+
+    assert restored_state == state
+    assert restored_action == action
+
+
+def test_multiple_game_outcomes():
+    """Test different game outcomes."""
+    outcomes = set()
+    agent1 = LearningAgent(epsilon=0.5)
+    agent2 = LearningAgent(epsilon=0.5)
+
+    # Play multiple games to ensure we see all possible outcomes
+    for _ in range(10):
+        outcome = play_game(agent1, agent2)
+        outcomes.add(outcome)
+
+    # Should see at least two different outcomes
+    assert len(outcomes) >= 2
+
+
+def test_cached_functions_consistency():
+    """Test that cached functions maintain consistency."""
+    board1 = tuple([" "] * 9)
+    board2 = tuple([" "] * 9)
+
+    # Test get_available_moves cache
+    moves1 = get_available_moves(board1)
+    moves2 = get_available_moves(board2)
+    assert moves1 is moves2  # Should return same cached object
+
+    # Test is_winner cache
+    result1 = is_winner(board1, "X")
+    result2 = is_winner(board2, "X")
+    assert result1 is result2  # Should return same cached object
