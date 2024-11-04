@@ -114,16 +114,6 @@ class LearningAgent:
             learned_value = reward
         self.update_q_value(state, action, old_q + self.alpha * (learned_value - old_q))
 
-    def _serialize_key(self, state: tuple[str], action: int) -> str:
-        """Convert a state-action pair to a string key."""
-        return f"{state}_{action}"
-
-    def _deserialize_key(self, key: str) -> tuple[tuple[str], int]:
-        """Convert a string key back to state-action pair."""
-        state_str, action = key.rsplit("_", 1)
-        state = eval(state_str)  # Safe since we control the input format
-        return state, int(action)
-
     def save_policy(self, filename: str) -> None:
         serialized_q_table = {
             self._serialize_key(state, action): value
@@ -138,6 +128,16 @@ class LearningAgent:
             self.q_table = {
                 self._deserialize_key(key): value for key, value in serialized_q_table.items()
             }
+
+    def _serialize_key(self, state: tuple[str], action: int) -> str:
+        """Convert a state-action pair to a string key."""
+        return f"{state}_{action}"
+
+    def _deserialize_key(self, key: str) -> tuple[tuple[str], int]:
+        """Convert a string key back to state-action pair."""
+        state_str, action = key.rsplit("_", 1)
+        state = eval(state_str)  # Safe since we control the input format
+        return state, int(action)
 
 
 class HumanPlayer:
