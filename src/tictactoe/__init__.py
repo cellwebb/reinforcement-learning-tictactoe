@@ -20,6 +20,18 @@ def get_available_moves(board: tuple[str, ...]) -> tuple[int, ...]:
     return tuple(i for i, mark in enumerate(board) if mark == " ")
 
 
+@lru_cache(maxsize=19683)
+def is_winner(board: tuple[str, ...], player: str) -> bool:
+    """Check if the given player has won."""
+    return any(all(board[i] == player for i in condition) for condition in WIN_CONDITIONS)
+
+
+@lru_cache(maxsize=19683)
+def is_draw(board: tuple[str, ...]) -> bool:
+    """Check if the game is a draw."""
+    return " " not in board
+
+
 class TicTacToe:
     """Tic-Tac-Toe game environment."""
 
@@ -36,12 +48,6 @@ class TicTacToe:
         self.current_player = "O" if self.current_player == "X" else "X"
         self.move_history.append(position)
         self.state_history.append(self.get_state())
-
-    def is_winner(self, player: str) -> bool:
-        return any(all(self.board[i] == player for i in condition) for condition in WIN_CONDITIONS)
-
-    def is_draw(self) -> bool:
-        return " " not in self.board
 
     def get_state(self) -> tuple[str]:
         # TODO: Implement a more efficient state representation
@@ -62,7 +68,7 @@ class LearningAgent:
     """Q-Learning agent for playing Tic-Tac-Toe."""
 
     def __init__(
-        self, alpha: float = 0.1, gamma: float = 1.0, epsilon: float = 0.1, policy_file: str = None
+        self, alpha: float = 0.1, gamma: float = 0.9, epsilon: float = 0.1, policy_file: str = None
     ):
         self.alpha = alpha  # learning rate
         self.gamma = gamma  # discount factor
@@ -173,7 +179,7 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
         player = env.current_player
         opponent = "O" if player == "X" else "X"
 
-        available_moves = get_available_moves(env.get_state())
+        available_moves = get_available_moves(state)
         action = players[player].choose_action(state, available_moves)
         env.make_move(action)
 
@@ -182,14 +188,14 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
 
         next_state = env.get_state()
 
-        if env.is_winner(player):
+        if is_winner(next_state, player):
             if players[player].player_type == "agent":
                 players[player].update_q_value(state, action, 1.0)
             if players[opponent].player_type == "agent":
                 players[opponent].update_q_value(prev_state, action, -1.0)
             return player
 
-        if env.is_draw():
+        if is_draw(next_state):
             for p in ["X", "O"]:
                 if players[p].player_type == "agent":
                     players[p].learn(state, action, 0.5, next_state, ())

@@ -7,6 +7,8 @@ from tictactoe import (
     play_game,
     play_against_ai,
     get_available_moves,
+    is_winner,
+    is_draw,
 )
 
 
@@ -40,16 +42,15 @@ def test_make_invalid_move(game):
 @pytest.mark.parametrize(
     "board,player,expected",
     [
-        (["X", "X", "X", " ", " ", " ", " ", " ", " "], "X", True),  # Horizontal win
-        (["O", " ", " ", "O", " ", " ", "O", " ", " "], "O", True),  # Vertical win
-        (["X", " ", " ", " ", "X", " ", " ", " ", "X"], "X", True),  # Diagonal win
-        (["O", "X", "O", "X", "O", "X", "X", "O", "X"], "O", False),  # No win
+        (("X", "X", "X", " ", " ", " ", " ", " ", " "), "X", True),  # Horizontal win
+        (("O", " ", " ", "O", " ", " ", "O", " ", " "), "O", True),  # Vertical win
+        (("X", " ", " ", " ", "X", " ", " ", " ", "X"), "X", True),  # Diagonal win
+        (("O", "X", "O", "X", "O", "X", "X", "O", "X"), "O", False),  # No win
     ],
 )
-def test_is_winner(game, board, player, expected):
+def test_is_winner(board, player, expected):
     """Test various win conditions."""
-    game.board = board
-    assert game.is_winner(player) == expected
+    assert is_winner(board, player) == expected
 
 
 @pytest.mark.parametrize(
@@ -59,10 +60,10 @@ def test_is_winner(game, board, player, expected):
         (["X", "O", "X", " ", "O", "O", "O", "X", "X"], False),  # Not full
     ],
 )
-def test_is_draw(game, board, expected):
+def test_is_draw(board, expected):
     """Test draw conditions."""
-    game.board = board
-    assert game.is_draw() == expected
+    board_tuple = tuple(board)
+    assert is_draw(board_tuple) == expected
 
 
 def test_get_state(game):
@@ -231,3 +232,31 @@ def test_str_representation():
     # Check board display format
     expected = "\n\n X | O |   \n-----------\n   | X |   \n-----------\n O |   |   \n\n"
     assert str(game) == expected
+
+
+def test_cached_is_winner():
+    """Test the cached is_winner function."""
+    empty_board = tuple(" " * 9)
+    assert not is_winner(empty_board, "X")
+
+    winning_board = ("X", "X", "X", " ", " ", " ", " ", " ", " ")
+    assert is_winner(winning_board, "X")
+
+    # Test cache hit (same result object)
+    result1 = is_winner(winning_board, "X")
+    result2 = is_winner(winning_board, "X")
+    assert result1 is result2
+
+
+def test_cached_is_draw():
+    """Test the cached is_draw function."""
+    empty_board = tuple(" " * 9)
+    assert not is_draw(empty_board)
+
+    draw_board = ("X", "O", "X", "O", "X", "O", "O", "X", "O")
+    assert is_draw(draw_board)
+
+    # Test cache hit (same result object)
+    result1 = is_draw(draw_board)
+    result2 = is_draw(draw_board)
+    assert result1 is result2
