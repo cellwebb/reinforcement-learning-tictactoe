@@ -29,8 +29,6 @@ class TicTacToe:
         self.current_player = starting_player
         self.move_order = []
 
-    # Remove get_available_moves method
-
     def make_move(self, position: int) -> None:
         if self.board[position] != " ":
             raise ValueError("Invalid move")
