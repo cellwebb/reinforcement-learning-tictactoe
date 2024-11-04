@@ -27,22 +27,14 @@ class LearningAgent:
         self.player_type = "agent"
 
     def get_q_value(self, state: str, action: int) -> float:
-        return self.q_table.get((state, action), 0.0)
+        return self.q_table.get((state, action), random.random() * 2 - 1)
 
     def update_q_value(self, state: str, action: int, value: float) -> None:
         self.q_table[(state, action)] = value
 
-    def choose_action(self, state: str, available_moves: tuple[int], mark: str) -> int:
+    def choose_action(self, state: str, available_moves: tuple[int]) -> int:
         if not available_moves:
             raise ValueError("No available moves")
-
-        # if can win in the next move, do it
-        for action in random.choices(available_moves):
-            simulated_state = list(state)
-            simulated_state[action] = mark
-            simulated_state = "".join(simulated_state)
-            if is_winner(simulated_state, mark):
-                return action
 
         if random.random() < self.epsilon:
             return random.choice(available_moves)

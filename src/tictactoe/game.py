@@ -1,3 +1,4 @@
+import random
 from .utils import get_available_moves, is_winner, is_draw, opponent_can_win, opponent_can_draw
 from .agents import LearningAgent, HumanPlayer
 
@@ -53,7 +54,16 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
         if not available_moves:
             return "draw"
 
-        action = players[player_mark].choose_action(state, available_moves)
+        for action in random.choices(available_moves):
+            simulated_state = list(state)
+            simulated_state[action] = player_mark
+            simulated_state = "".join(simulated_state)
+            if is_winner(simulated_state, player_mark):
+                action = action
+                break
+
+        else:
+            action = players[player_mark].choose_action(state, available_moves)
         env.make_move(action)
 
         if human_in_game:
