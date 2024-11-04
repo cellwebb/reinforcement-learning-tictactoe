@@ -50,8 +50,8 @@ def train(
 
         results[result] += 1
 
-        agent1.epsilon = starting_epsilons[0] * 0.9999**i
-        # agent2.epsilon = starting_epsilons[1] * 0.9999**i
+        agent1.epsilon = starting_epsilons[0] * i / num_episodes
+        agent2.epsilon = starting_epsilons[1] * i / num_episodes
 
     print(f"Results: {results}")
     if not single_agent_training:
