@@ -26,7 +26,6 @@ def is_winner(board: tuple[str, ...], player: str) -> bool:
     return any(all(board[i] == player for i in condition) for condition in WIN_CONDITIONS)
 
 
-@lru_cache(maxsize=19683)
 def is_draw(board: tuple[str, ...]) -> bool:
     """Check if the game is a draw."""
     return " " not in board
@@ -306,12 +305,13 @@ def cli():
         train(agent1=agent, num_episodes=args.n_episodes)
         if args.policy:
             agent.save_policy(args.policy)
+
     else:  # play
         if not args.policy:
             print("Error: --policy required for play mode")
             return
         try:
-            agent = LearningAgent(policy_file=args.policy, epsilon=0)  # No exploration during play
+            agent = LearningAgent(policy_file=args.policy)
             play_against_ai(agent, human_plays_first=not args.ai_first)
         except FileNotFoundError:
             print(f"Error: Policy file '{args.policy}' not found")
