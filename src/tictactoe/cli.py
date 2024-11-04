@@ -19,7 +19,7 @@ def cli():
     # Subparser for the 'play' command
     play_parser = subparsers.add_parser("play", help="Play against the AI agent")
     play_parser.add_argument(
-        "--policy", type=str, required=True, help="Policy file for opponent AI"
+        "--policy", type=str, help="Policy file for opponent AI", default="agent1.json"
     )
     play_parser.add_argument("--ai-first", action="store_true", help="AI plays first")
 
