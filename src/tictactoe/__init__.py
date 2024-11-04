@@ -188,14 +188,14 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
             if players[player].player_type == "agent":
                 players[player].update_q_value(state, action, 1.0)
             if players[opponent].player_type == "agent":
-                players[opponent].update_q_value(env.state_history[-3], env.move_history[-3], -1.0)
+                players[opponent].update_q_value(env.state_history[-3], env.move_history[-2], -1.0)
             return player
 
         if is_draw(new_state):
             if players[player].player_type == "agent":
                 players[player].update_q_value(state, action, 0.5)
             if players[opponent].player_type == "agent":
-                players[opponent].update_q_value(env.state_history[-3], env.move_history[-3], 0.5)
+                players[opponent].update_q_value(env.state_history[-3], env.move_history[-2], 0.5)
             return "draw"
 
         if players[player].player_type == "agent":
@@ -300,6 +300,7 @@ def cli():
     )
     train_parser.add_argument("--agent1", type=str, help="Policy file for agent 1")
     train_parser.add_argument("--agent2", type=str, help="Policy file for agent 2")
+    train_parser.add_argument("--config", type=str, help="Path to configuration file")
 
     # Subparser for the 'play' command
     play_parser = subparsers.add_parser("play", help="Play against the AI agent")
@@ -309,6 +310,22 @@ def cli():
     args = parser.parse_args()
 
     if args.command == "train":
+        if args.config:
+            import json  # Or PyYAML for YAML files
+
+            with open(args.config, "r") as f:
+                config = json.load(f)
+
+            args.num_episodes = config.get("num_episodes", args.num_episodes)
+            args.alpha = config.get("alpha", args.alpha)
+            args.gamma = config.get("gamma", args.gamma)
+            args.epsilon = config.get("epsilon", args.epsilon)
+            args.single_agent_training = config.get(
+                "single_agent_training", args.single_agent_training
+            )
+            args.agent1 = config.get("agent1", args.agent1)
+            args.agent2 = config.get("agent2", args.agent2)
+
         agent1 = LearningAgent(alpha=args.alpha, gamma=args.gamma, epsilon=args.epsilon)
         if args.single_agent_training:
             agent2 = agent1
