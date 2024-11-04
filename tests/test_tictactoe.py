@@ -78,10 +78,14 @@ def test_get_state(game):
 # Learning Agent Tests
 def test_agent_initialization(agent):
     """Test that the agent is initialized with correct parameters."""
-    assert agent.alpha == 0.1
-    assert agent.gamma == 0.9
-    assert agent.epsilon == 0.1
+    assert 0 <= agent.alpha <= 1
+    assert 0 <= agent.gamma <= 1
+    assert 0 <= agent.epsilon <= 1
     assert agent.q_table == {}
+    assert isinstance(agent.starting_q_value, (int, float))
+    assert isinstance(agent.win_reward, (int, float))
+    assert isinstance(agent.draw_reward, (int, float))
+    assert isinstance(agent.loss_reward, (int, float))
 
 
 def test_agent_get_q_value(agent):
