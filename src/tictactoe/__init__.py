@@ -1,6 +1,6 @@
 import random
 import json
-import yaml  # Ensure PyYAML is imported for YAML parsing
+import yaml
 from functools import lru_cache
 
 WIN_CONDITIONS = [
@@ -49,7 +49,7 @@ class TicTacToe:
         self.move_history.append(position)
         self.state_history.append(self.get_state())
 
-    def get_state(self) -> tuple[str]:
+    def get_state(self) -> str:
         return "".join(self.board)
 
     def __str__(self):
@@ -67,17 +67,23 @@ class LearningAgent:
     """Q-Learning agent for playing Tic-Tac-Toe."""
 
     def __init__(
-        self, alpha: float = 0.1, gamma: float = 0.9, epsilon: float = 0.1, policy_file: str = None
+        self,
+        alpha: float = 0.1,
+        gamma: float = 0.9,
+        epsilon: float = 0.1,
+        policy_infile: str = None,
+        policy_outfile: str = None,
     ):
         self.alpha = alpha  # learning rate
         self.gamma = gamma  # discount factor
         self.epsilon = epsilon  # exploration rate
 
-        if policy_file:
-            self.load_policy(policy_file)
+        if policy_infile:
+            self.load_policy(policy_infile)
         else:
             self.q_table = {}
 
+        self.policy_outfile = policy_outfile
         self.player_type = "agent"
 
     def get_q_value(self, state: str, action: int) -> float:
@@ -113,7 +119,10 @@ class LearningAgent:
             learned_value = reward
         self.update_q_value(state, action, old_q + self.alpha * (learned_value - old_q))
 
-    def save_policy(self, filename: str) -> None:
+    def save_policy(self, filename: str = None) -> None:
+        """Save the Q-table to a file."""
+        if filename is None:
+            filename = self.policy_outfile
         serialized_q_table = {
             self._serialize_key(state, action): value
             for (state, action), value in self.q_table.items()
@@ -312,36 +321,25 @@ def cli():
             agent1_config = agents_config.get("agent1", {})
             agent2_config = agents_config.get("agent2", {})
 
-            agent1_infile = agent1_config.get("infile", "")
-            agent1_outfile = agent1_config.get("outfile", "")
-            agent1_alpha = agent1_config.get("alpha", 0.1)
-            agent1_gamma = agent1_config.get("gamma", 0.9)
-            agent1_epsilon = agent1_config.get("epsilon", 0.1)
-
-            agent2_infile = agent2_config.get("infile", "")
-            agent2_outfile = agent2_config.get("outfile", "")
-            agent2_alpha = agent2_config.get("alpha", 0.1)
-            agent2_gamma = agent2_config.get("gamma", 0.9)
-            agent2_epsilon = agent2_config.get("epsilon", 0.1)
-
         # Initialize Agent 1
         agent1 = LearningAgent(
-            alpha=agent1_alpha,
-            gamma=agent1_gamma,
-            epsilon=agent1_epsilon,
-            policy_file=agent1_infile if agent1_infile else None,
+            alpha=agent1_config.get("alpha", 0.1),
+            gamma=agent1_config.get("gamma", 0.9),
+            epsilon=agent1_config.get("epsilon", 0.1),
+            policy_infile=agent1_config.get("policy_infile"),
+            policy_outfile=agent1_config.get("policy_outfile"),
         )
 
         # Initialize Agent 2
         if single_agent_training:
             agent2 = agent1
-            agent2_outfile = agent1_outfile  # Ensure both agents save to the same outfile
         else:
             agent2 = LearningAgent(
-                alpha=agent2_alpha,
-                gamma=agent2_gamma,
-                epsilon=agent2_epsilon,
-                policy_file=agent2_infile if agent2_infile else None,
+                alpha=agent2_config.get("alpha", 0.1),
+                gamma=agent2_config.get("gamma", 0.9),
+                epsilon=agent2_config.get("epsilon", 0.1),
+                policy_infile=agent2_config.get("policy_infile"),
+                policy_outfile=agent2_config.get("policy_outfile"),
             )
 
         # Start Training
@@ -349,13 +347,17 @@ def cli():
             agent1=agent1,
             agent2=agent2,
             num_episodes=num_episodes,
-            agent1_policy_file=agent1_outfile,
-            agent2_policy_file=agent2_outfile,
+            agent1_policy_file=agent1_config.get("policy_outfile"),
+            agent2_policy_file=agent2_config.get("policy_outfile"),
+            switch_sides=True,
         )
 
     elif args.command == "play":
         try:
-            agent = LearningAgent(policy_file=args.policy)
+            agent = LearningAgent(
+                policy_infile=args.policy,
+                policy_outfile=None,  # Outfile not needed when playing
+            )
             play_against_ai(agent, human_plays_first=not args.ai_first)
         except FileNotFoundError:
             print(f"Error: Policy file '{args.policy}' not found")

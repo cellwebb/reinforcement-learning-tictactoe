@@ -113,7 +113,8 @@ def test_agent_policy_save_load(tmp_path):
     policy_file = tmp_path / "test_policy.json"
     agent.save_policy(str(policy_file))
 
-    new_agent = LearningAgent(policy_file=str(policy_file))
+    # Replace 'policy_file' with 'policy_infile'
+    new_agent = LearningAgent(policy_infile=str(policy_file))
     assert new_agent.get_q_value(state, action) == 1.0
 
 
@@ -265,7 +266,8 @@ def test_cached_is_draw():
 def test_learning_agent_str_loading():
     """Test loading agent from non-existent file gracefully fails."""
     with pytest.raises(FileNotFoundError):
-        LearningAgent(policy_file="nonexistent.json")
+        # Replace 'policy_file' with 'policy_infile'
+        LearningAgent(policy_infile="nonexistent.json")
 
 
 def test_human_player_type():
@@ -380,18 +382,18 @@ num_episodes: 10
 
 single_agent_training: false  # If true, only agent1 will be trained
 
-# If infile is not empty, the agent will load the Q-table from the file
-# If outfile is not empty, the agent will save the Q-table to the file
+# If policy_infile is not empty, the agent will load the Q-table from the file
+# If policy_outfile is not empty, the agent will save the Q-table to the file
 agents:
   agent1:
-    infile: ""
-    outfile: "{agent1_outfile}"
+    policy_infile: ""
+    policy_outfile: "{agent1_outfile}"
     alpha: 0.3
     gamma: 0.9
     epsilon: 0.05
   agent2:
-    infile: ""
-    outfile: "{agent2_outfile}"
+    policy_infile: ""
+    policy_outfile: "{agent2_outfile}"
     alpha: 0.2
     gamma: 0.8
     epsilon: 0.2
