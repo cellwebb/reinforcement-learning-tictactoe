@@ -1,4 +1,4 @@
-num_episodes: 100_000
+num_episodes: 100000
 
 single_agent_training: false  # If true, only agent1 will be trained
 

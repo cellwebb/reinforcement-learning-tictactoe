@@ -9,8 +9,10 @@ from tictactoe import (
     get_available_moves,
     is_winner,
     is_draw,
+    train,  # Now accessible directly from tictactoe
+    cli,  # Now accessible directly from tictactoe
 )
-import json
+import itertools  # Add this import
 
 
 def test_initial_state(game):
@@ -113,7 +115,7 @@ def test_agent_policy_save_load(tmp_path):
     policy_file = tmp_path / "test_policy.json"
     agent.save_policy(str(policy_file))
 
-    # Replace 'policy_file' with 'policy_infile'
+    # Load policy into a new agent
     new_agent = LearningAgent(policy_infile=str(policy_file))
     assert new_agent.get_q_value(state, action) == 1.0
 
@@ -188,15 +190,15 @@ def test_agent_learning():
 
 def test_train_function():
     """Test the main training loop."""
-    with patch("random.random", side_effect=[0.4, 0.6] * 50):  # Alternate between agents
+    with patch(
+        "tictactoe.agents.random.random", side_effect=itertools.cycle([0.4, 0.6])
+    ):  # Use correct patch path
         with patch("tictactoe.play_game") as mock_play:
             # Simulate alternating wins and draws
             mock_play.side_effect = ["X", "O", "draw"] * 33334
 
             # Run main with reduced episodes for testing
-            from tictactoe import train
-
-            train()
+            train()  # Should now work correctly
 
 
 def test_cached_get_available_moves():
@@ -303,10 +305,7 @@ def test_train_with_different_episodes():
     """Test main function with different episode counts."""
     with patch("random.random", return_value=0.4):
         with patch("tictactoe.play_game", return_value="X"):
-            from tictactoe import train
-
-            with patch("builtins.print"):  # Suppress output
-                train()  # Should complete without errors
+            train()  # Should now work correctly
 
 
 def test_state_history_tracking():
@@ -370,7 +369,6 @@ def test_cli_train(tmp_path, monkeypatch, capsys):
     """Test CLI training mode."""
     import sys
     import json
-    from tictactoe import cli
 
     # Define paths for outfile policy files within tmp_path
     agent1_outfile = tmp_path / "agent1.json"
@@ -407,7 +405,7 @@ agents:
     monkeypatch.setattr(sys, "argv", test_args)
 
     # Run CLI
-    cli()
+    cli()  # Should now work correctly
 
     # Capture and assert output
     captured = capsys.readouterr()
@@ -433,12 +431,11 @@ agents:
 def test_cli_play_missing_policy(capsys):
     """Test CLI play mode with missing policy file."""
     import sys
-    from tictactoe import cli
 
     # Mock argv with the 'play' command but without '--policy'
     with patch.object(sys, "argv", ["tictactoe", "play"]):
         with pytest.raises(SystemExit) as excinfo:
-            cli()
+            cli()  # Should now work correctly
         captured = capsys.readouterr()
         assert "the following arguments are required: --policy" in captured.err
 
@@ -446,11 +443,10 @@ def test_cli_play_missing_policy(capsys):
 def test_cli_play_nonexistent_policy(capsys):
     """Test CLI play mode with nonexistent policy file."""
     import sys
-    from tictactoe import cli
 
     # Mock argv with the 'play' command and a nonexistent policy file
     with patch.object(sys, "argv", ["tictactoe", "play", "--policy=nonexistent.json"]):
-        cli()
+        cli()  # Should now work correctly
         captured = capsys.readouterr()
         assert "Error: Policy file 'nonexistent.json' not found" in captured.out
 
@@ -458,7 +454,6 @@ def test_cli_play_nonexistent_policy(capsys):
 def test_cli_play_valid(tmp_path, random_move_generator):
     """Test CLI play mode with valid policy using a random move generator."""
     import sys
-    from tictactoe import cli
 
     # Create a temporary policy file
     agent = LearningAgent()
@@ -468,4 +463,4 @@ def test_cli_play_valid(tmp_path, random_move_generator):
     # Mock input for gameplay with the generator fixture and suppress print
     with patch("builtins.input", side_effect=random_move_generator), patch("builtins.print"):
         with patch.object(sys, "argv", ["tictactoe", "play", f"--policy={policy_file}"]):
-            cli()  # Should complete without errors
+            cli()  # Should now work correctly
