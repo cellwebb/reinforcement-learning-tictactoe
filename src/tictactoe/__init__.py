@@ -285,37 +285,48 @@ def cli():
     import argparse
 
     parser = argparse.ArgumentParser(description="Tic-Tac-Toe with Q-Learning")
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--train", action="store_true", help="Train the AI agent")
-    group.add_argument("--play", action="store_true", help="Play against the AI agent")
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
-    parser.add_argument("--n-episodes", type=int, default=100, help="Number of training episodes")
-    parser.add_argument("--alpha", type=float, default=0.1, help="Learning rate")
-    parser.add_argument("--gamma", type=float, default=0.9, help="Discount factor")
-    parser.add_argument("--epsilon", type=float, default=0.1, help="Exploration rate")
-    parser.add_argument("--agent1", type=str, help="Policy file for agent 1")
-    parser.add_argument("--agent2", type=str, help="Policy file for agent 2")
-    parser.add_argument("--policy", type=str, help="Policy file for loading/saving")
-    parser.add_argument("--ai-first", action="store_true", help="AI plays first")
+    # Subparser for the 'train' command
+    train_parser = subparsers.add_parser("train", help="Train the AI agent")
+    train_parser.add_argument(
+        "--num-episodes", type=int, default=100, help="Number of training episodes"
+    )
+    train_parser.add_argument("--alpha", type=float, default=0.1, help="Learning rate")
+    train_parser.add_argument("--gamma", type=float, default=0.9, help="Discount factor")
+    train_parser.add_argument("--epsilon", type=float, default=0.1, help="Exploration rate")
+    train_parser.add_argument(
+        "--single-agent-training", action="store_true", help="Train a single agent"
+    )
+    train_parser.add_argument("--agent1", type=str, help="Policy file for agent 1")
+    train_parser.add_argument("--agent2", type=str, help="Policy file for agent 2")
+
+    # Subparser for the 'play' command
+    play_parser = subparsers.add_parser("play", help="Play against the AI agent")
+    play_parser.add_argument("--policy", type=str, required=True, help="Policy file for loading")
+    play_parser.add_argument("--ai-first", action="store_true", help="AI plays first")
 
     args = parser.parse_args()
 
-    if args.train:
-        agent = LearningAgent(epsilon=args.epsilon)
-        train(agent1=agent, num_episodes=args.n_episodes)
-        if args.policy:
-            agent.save_policy(args.policy)
-
-    else:  # play
-        if not args.policy:
-            print("Error: --policy required for play mode")
-            return
+    if args.command == "train":
+        agent1 = LearningAgent(alpha=args.alpha, gamma=args.gamma, epsilon=args.epsilon)
+        if args.single_agent_training:
+            agent2 = agent1
+        else:
+            agent2 = LearningAgent(alpha=args.alpha, gamma=args.gamma, epsilon=args.epsilon)
+        train(
+            agent1=agent1,
+            agent2=agent2,
+            num_episodes=args.num_episodes,
+            agent1_policy_file=args.agent1,
+            agent2_policy_file=args.agent2,
+        )
+    elif args.command == "play":
         try:
             agent = LearningAgent(policy_file=args.policy)
             play_against_ai(agent, human_plays_first=not args.ai_first)
         except FileNotFoundError:
             print(f"Error: Policy file '{args.policy}' not found")
-            return
 
 
 if __name__ == "__main__":
