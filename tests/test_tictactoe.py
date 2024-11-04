@@ -77,7 +77,7 @@ def test_get_state(game):
 def test_agent_initialization(agent):
     """Test that the agent is initialized with correct parameters."""
     assert agent.alpha == 0.1
-    assert agent.gamma == 1.0
+    assert agent.gamma == 0.9
     assert agent.epsilon == 0.1
     assert agent.q_table == {}
 
