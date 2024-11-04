@@ -73,25 +73,24 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
 
         if players[player_mark].player_type == "agent":
             if is_winner(new_state, player_mark):
-                reward = 1.0
-                players[player_mark].learn(state, action, 1.0, done=True)
+                reward = 100
+                players[player_mark].learn(state, action, reward, done=True)
                 return player_mark
 
             if is_draw(new_state):
-                reward = 0.5
-                players[player_mark].learn(state, action, 0.5, done=True)
+                reward = 10
+                players[player_mark].learn(state, action, reward, done=True)
                 return "draw"
 
             if opponent_can_win(new_state, player_mark):
-                reward = -1.0
-                players[player_mark].learn(state, action, -1.0, done=True)
+                reward = -1
+                players[player_mark].learn(state, action, reward, done=True)
             elif opponent_can_draw(new_state):
-                reward = 0.5
-                players[player_mark].learn(state, action, 0.5, done=True)
+                reward = 10
+                players[player_mark].learn(state, action, reward, done=True)
             else:
                 reward = 0
-
-            players[player_mark].learn(state, action, reward, new_state, player_mark)
+                players[player_mark].learn(state, action, reward, new_state, player_mark)
 
 
 def play_against_ai(ai_agent, human_plays_first: bool = True) -> str:
