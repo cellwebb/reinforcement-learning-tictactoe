@@ -1,3 +1,4 @@
+import time
 from .agents import LearningAgent
 from .game import play_game
 import random
@@ -25,6 +26,8 @@ def train(
     results = {"X": 0, "O": 0, "draw": 0}
     wins = {"Agent 1": 0, "Agent 2": 0, "draw": 0}
 
+    start_time = time.time()
+
     for _ in range(num_episodes):
         if switch_sides or random.random() < 0.5:
             result = play_game(agent1, agent2)
@@ -47,8 +50,14 @@ def train(
 
         results[result] += 1
 
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    games_per_second = num_episodes / elapsed_time
+
     print(f"Results: {results}")
     print(f"Wins: {wins}")
+    print(f"Elapsed time: {elapsed_time:.2f} seconds")
+    print(f"Average games per second: {games_per_second:.2f}")
 
     if agent1_policy_file:
         agent1.save_policy(agent1_policy_file)
