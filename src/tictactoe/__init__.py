@@ -207,13 +207,12 @@ def play_against_ai(ai_agent, human_plays_first: bool = True) -> None:
     """Play a game against the AI agent."""
     human = HumanPlayer()
 
-    if human_plays_first:
-        agents = {"X": human, "O": ai_agent}
-    else:
-        agents = {"X": ai_agent, "O": human}
-
     print("Game starting! Positions are numbered 0-8, left to right, top to bottom")
-    result = play_game(agents["X"], agents["O"])
+
+    if human_plays_first:
+        result = play_game(human, ai_agent)
+    else:
+        result = play_game(ai_agent, human)
 
     if result == "draw":
         print("It's a draw!")
