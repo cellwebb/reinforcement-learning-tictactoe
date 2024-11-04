@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "A Tic-Tac-Toe AI that learns through Q-learning"
 requires-python = ">=3.11"
 
+[project.dependencies]
+pyyaml = ">=6.0"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3.3",

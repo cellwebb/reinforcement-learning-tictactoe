@@ -1,5 +1,6 @@
 import random
 import json
+import yaml
 from functools import lru_cache
 
 WIN_CONDITIONS = [
@@ -309,10 +310,9 @@ def cli():
 
     if args.command == "train":
         if args.config:
-            import json  # Or PyYAML for YAML files
 
             with open(args.config, "r") as f:
-                config = json.load(f)
+                config = yaml.safe_load(f)
 
             args.num_episodes = config.get("num_episodes", args.num_episodes)
             args.alpha = config.get("alpha", args.alpha)
