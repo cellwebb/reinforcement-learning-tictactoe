@@ -26,14 +26,16 @@ class TicTacToe:
     def __init__(self, starting_player: str = "X"):
         self.board = [" " for _ in range(9)]
         self.current_player = starting_player
-        self.move_order = []
+        self.state_history = [self.get_state()]
+        self.move_history = []
 
     def make_move(self, position: int) -> None:
         if self.board[position] != " ":
             raise ValueError("Invalid move")
         self.board[position] = self.current_player
         self.current_player = "O" if self.current_player == "X" else "X"
-        self.move_order.append(position)
+        self.move_history.append(position)
+        self.state_history.append(self.get_state())
 
     def is_winner(self, player: str) -> bool:
         return any(all(self.board[i] == player for i in condition) for condition in WIN_CONDITIONS)
@@ -42,6 +44,7 @@ class TicTacToe:
         return " " not in self.board
 
     def get_state(self) -> tuple[str]:
+        # TODO: Implement a more efficient state representation
         return tuple(self.board)
 
     def __str__(self):
@@ -91,8 +94,8 @@ class LearningAgent:
         state: tuple[str],
         action: int,
         reward: float,
-        next_state: tuple[str],
-        next_available_moves: tuple[int, ...],
+        next_state: tuple[str] | None = None,
+        next_available_moves: tuple[int, ...] | None = None,
     ) -> None:
         """Update Q-value based on reward and learned value."""
         old_q = self.get_q_value(state, action)
@@ -140,10 +143,9 @@ class HumanPlayer:
     def choose_action(self, state: tuple[str], available_moves: list[int]) -> int:
         """Get move from human player via console input."""
 
-        print(f"Available moves (0-8): {available_moves}")
-
         while True:
             try:
+                print(f"Available moves (0-8): {available_moves}")
                 move = int(input("Enter your move: "))
                 if move in available_moves:
                     return move
@@ -154,20 +156,24 @@ class HumanPlayer:
 
 def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | HumanPlayer) -> str:
     """Play a game of Tic-Tac-Toe between two agents, two humans, or a human and an agent."""
+
     env = TicTacToe()
 
     players = {"X": player1, "O": player2}
-    state = env.get_state()
 
-    human_in_game = "human" in [players["X"].player_type, players["O"].player_type]
+    human_in_game = "human" in [player1.player_type, player2.player_type]
     if human_in_game:
         print(env)
+
+    state = env.get_state()
+    prev_state = None
+    prev_action = None
 
     while True:
         player = env.current_player
         opponent = "O" if player == "X" else "X"
 
-        available_moves = list(get_available_moves(env.get_state()))
+        available_moves = get_available_moves(env.get_state())
         action = players[player].choose_action(state, available_moves)
         env.make_move(action)
 
@@ -178,9 +184,9 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
 
         if env.is_winner(player):
             if players[player].player_type == "agent":
-                players[player].update_q_value(state, action, 1)
+                players[player].update_q_value(state, action, 1.0)
             if players[opponent].player_type == "agent":
-                players[opponent].learn(state, action, -1, next_state, ())
+                players[opponent].update_q_value(prev_state, action, -1.0)
             return player
 
         if env.is_draw():
