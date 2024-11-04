@@ -27,7 +27,7 @@ def train(
     wins = {"Agent 1": 0, "Agent 2": 0, "draw": 0}
 
     for _ in tqdm(range(num_episodes), desc="Training Progress"):
-        if switch_sides or random.random() < 0.5:
+        if single_agent_training or (switch_sides and random.random() < 0.5):
             result = play_game(agent1, agent2)
 
             if result == "X":
@@ -49,9 +49,10 @@ def train(
         results[result] += 1
 
     print(f"Results: {results}")
-    print(f"Wins: {wins}")
+    if not single_agent_training:
+        print(f"Wins: {wins}")
 
     if agent1_policy_file:
         agent1.save_policy(agent1_policy_file)
-    if agent2_policy_file:
+    if agent2_policy_file and not single_agent_training:
         agent2.save_policy(agent2_policy_file)
