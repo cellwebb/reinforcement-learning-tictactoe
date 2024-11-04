@@ -27,7 +27,7 @@ class LearningAgent:
         self.player_type = "agent"
 
     def get_q_value(self, state: str, action: int) -> float:
-        return self.q_table.get((state, action), 1.0)
+        return self.q_table.get((state, action), 0.0)
 
     def update_q_value(self, state: str, action: int, value: float) -> None:
         self.q_table[(state, action)] = value
@@ -51,10 +51,24 @@ class LearningAgent:
         """Update Q-value based on reward and learned value."""
         old_q = self.get_q_value(state, action)
         if next_available_moves:
-            future_rewards = [
-                self.get_q_value(next_state, next_action) for next_action in next_available_moves
-            ]
-            learned_value = reward + self.gamma * max(future_rewards)
+            future_rewards = []
+            for next_action in next_available_moves:
+                # Simulate the player's next state after the opponent's move
+                simulated_state = list(next_state)
+                simulated_state[next_action] = self.player_type
+                simulated_state = "".join(simulated_state)
+                future_actions = get_available_moves(simulated_state)
+                if future_actions:
+                    future_rewards.append(
+                        max(
+                            self.get_q_value(simulated_state, future_action)
+                            for future_action in future_actions
+                        )
+                    )
+            if future_rewards:
+                learned_value = reward + self.gamma * max(future_rewards)
+            else:
+                learned_value = reward
         else:
             learned_value = reward
         self.update_q_value(state, action, old_q + self.alpha * (learned_value - old_q))

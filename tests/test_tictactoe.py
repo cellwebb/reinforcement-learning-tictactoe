@@ -88,9 +88,9 @@ def test_agent_get_q_value(agent):
     """Test Q-value retrieval."""
     state = "         "
     action = 0
-    assert agent.get_q_value(state, action) == 1.0
-    agent.update_q_value(state, action, 0.0)
     assert agent.get_q_value(state, action) == 0.0
+    agent.update_q_value(state, action, 0.5)
+    assert agent.get_q_value(state, action) == 0.5
 
 
 def test_agent_choose_action_exploitation():

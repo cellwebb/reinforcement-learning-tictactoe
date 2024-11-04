@@ -1,0 +1,296 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.10, pytest-8.3.3, pluggy-1.5.0
+rootdir: /Users/cell/projects/reinforcement-learning-tictactoe
+configfile: pyproject.toml
+testpaths: tests
+plugins: cov-6.0.0
+collected 39 items
+
+tests/test_tictactoe.py .................F...F........F..F.F...          [100%]
+
+=================================== FAILURES ===================================
+_____________________________ test_full_game_play ______________________________
+
+    def test_full_game_play():
+        """Test complete game between two agents."""
+        agent1 = LearningAgent(epsilon=0)
+        agent2 = LearningAgent(epsilon=0)
+>       result = play_game(agent1, agent2)
+
+tests/test_tictactoe.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/tictactoe/game.py:76: in play_game
+    players[player].learn(state, action, 0, new_state, get_available_moves(new_state))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tictactoe.agents.LearningAgent object at 0x1066e1f10>
+state = 'XXOXO  OX', action = 5, reward = 0, next_state = 'XXOXOO OX'
+next_available_moves = (6,)
+
+    def learn(
+        self,
+        state: str,
+        action: int,
+        reward: float,
+        next_state: str | None = None,
+        next_available_moves: tuple[int, ...] | None = None,
+    ) -> None:
+        """Update Q-value based on reward and learned value."""
+        old_q = self.get_q_value(state, action)
+        if next_available_moves:
+            future_rewards = []
+            for next_action in next_available_moves:
+                # Simulate the player's next state after the opponent's move
+                simulated_state = list(next_state)
+                simulated_state[next_action] = self.player_type
+                simulated_state = "".join(simulated_state)
+                future_rewards.append(
+>                   max(
+                        self.get_q_value(simulated_state, future_action)
+                        for future_action in get_available_moves(simulated_state)
+                    )
+                )
+E               ValueError: max() arg is an empty sequence
+
+src/tictactoe/agents.py:61: ValueError
+_____________________________ test_train_function ______________________________
+
+    def test_train_function():
+        """Test the main training loop."""
+        with patch(
+            "tictactoe.agents.random.random", side_effect=itertools.cycle([0.4, 0.6])
+        ):  # Use correct patch path
+            with patch("tictactoe.play_game") as mock_play:
+                # Simulate alternating wins and draws
+                mock_play.side_effect = ["X", "O", "draw"] * 33334
+    
+                # Run main with reduced episodes for testing
+>               train()  # Should now work correctly
+
+tests/test_tictactoe.py:201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/tictactoe/training.py:30: in train
+    result = play_game(agent1, agent2)
+src/tictactoe/game.py:76: in play_game
+    players[player].learn(state, action, 0, new_state, get_available_moves(new_state))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tictactoe.agents.LearningAgent object at 0x1067a3690>
+state = 'OXXXO  OX', action = 6, reward = 0, next_state = 'OXXXO OOX'
+next_available_moves = (5,)
+
+    def learn(
+        self,
+        state: str,
+        action: int,
+        reward: float,
+        next_state: str | None = None,
+        next_available_moves: tuple[int, ...] | None = None,
+    ) -> None:
+        """Update Q-value based on reward and learned value."""
+        old_q = self.get_q_value(state, action)
+        if next_available_moves:
+            future_rewards = []
+            for next_action in next_available_moves:
+                # Simulate the player's next state after the opponent's move
+                simulated_state = list(next_state)
+                simulated_state[next_action] = self.player_type
+                simulated_state = "".join(simulated_state)
+                future_rewards.append(
+>                   max(
+                        self.get_q_value(simulated_state, future_action)
+                        for future_action in get_available_moves(simulated_state)
+                    )
+                )
+E               ValueError: max() arg is an empty sequence
+
+src/tictactoe/agents.py:61: ValueError
+______________________ test_train_with_different_episodes ______________________
+
+    def test_train_with_different_episodes():
+        """Test main function with different episode counts."""
+        with patch("random.random", return_value=0.4):
+            with patch("tictactoe.play_game", return_value="X"):
+>               train()  # Should now work correctly
+
+tests/test_tictactoe.py:308: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/tictactoe/training.py:30: in train
+    result = play_game(agent1, agent2)
+src/tictactoe/game.py:76: in play_game
+    players[player].learn(state, action, 0, new_state, get_available_moves(new_state))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tictactoe.agents.LearningAgent object at 0x106774a90>
+state = 'XX O XOOX', action = 2, reward = 0, next_state = 'XXOO XOOX'
+next_available_moves = (4,)
+
+    def learn(
+        self,
+        state: str,
+        action: int,
+        reward: float,
+        next_state: str | None = None,
+        next_available_moves: tuple[int, ...] | None = None,
+    ) -> None:
+        """Update Q-value based on reward and learned value."""
+        old_q = self.get_q_value(state, action)
+        if next_available_moves:
+            future_rewards = []
+            for next_action in next_available_moves:
+                # Simulate the player's next state after the opponent's move
+                simulated_state = list(next_state)
+                simulated_state[next_action] = self.player_type
+                simulated_state = "".join(simulated_state)
+                future_rewards.append(
+>                   max(
+                        self.get_q_value(simulated_state, future_action)
+                        for future_action in get_available_moves(simulated_state)
+                    )
+                )
+E               ValueError: max() arg is an empty sequence
+
+src/tictactoe/agents.py:61: ValueError
+_________________________ test_multiple_game_outcomes __________________________
+
+    def test_multiple_game_outcomes():
+        """Test different game outcomes."""
+        outcomes = set()
+        agent1 = LearningAgent(epsilon=0.5)
+        agent2 = LearningAgent(epsilon=0.5)
+    
+        # Play multiple games to ensure we see all possible outcomes
+        for _ in range(10):
+>           outcome = play_game(agent1, agent2)
+
+tests/test_tictactoe.py:345: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/tictactoe/game.py:76: in play_game
+    players[player].learn(state, action, 0, new_state, get_available_moves(new_state))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tictactoe.agents.LearningAgent object at 0x1067aae90>
+state = 'XO XOX XO', action = 2, reward = 0, next_state = 'XOOXOX XO'
+next_available_moves = (6,)
+
+    def learn(
+        self,
+        state: str,
+        action: int,
+        reward: float,
+        next_state: str | None = None,
+        next_available_moves: tuple[int, ...] | None = None,
+    ) -> None:
+        """Update Q-value based on reward and learned value."""
+        old_q = self.get_q_value(state, action)
+        if next_available_moves:
+            future_rewards = []
+            for next_action in next_available_moves:
+                # Simulate the player's next state after the opponent's move
+                simulated_state = list(next_state)
+                simulated_state[next_action] = self.player_type
+                simulated_state = "".join(simulated_state)
+                future_rewards.append(
+>                   max(
+                        self.get_q_value(simulated_state, future_action)
+                        for future_action in get_available_moves(simulated_state)
+                    )
+                )
+E               ValueError: max() arg is an empty sequence
+
+src/tictactoe/agents.py:61: ValueError
+________________________________ test_cli_train ________________________________
+
+tmp_path = PosixPath('/private/var/folders/y9/711q0cyj01d5dv5lm32q66x00000gn/T/pytest-of-cell/pytest-76/test_cli_train0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1067e2bd0>
+capsys = <_pytest.capture.CaptureFixture object at 0x106678c50>
+
+    def test_cli_train(tmp_path, monkeypatch, capsys):
+        """Test CLI training mode."""
+        import sys
+        import json
+    
+        # Define paths for outfile policy files within tmp_path
+        agent1_outfile = tmp_path / "agent1.json"
+        agent2_outfile = tmp_path / "agent2.json"
+    
+        # Create a temporary config.yaml with desired parameters
+        config_content = f"""
+    num_episodes: 10
+    
+    single_agent_training: false  # If true, only agent1 will be trained
+    
+    # If policy_infile is not empty, the agent will load the Q-table from the file
+    # If policy_outfile is not empty, the agent will save the Q-table to the file
+    agents:
+      agent1:
+        policy_infile: ""
+        policy_outfile: "{agent1_outfile}"
+        alpha: 0.3
+        gamma: 0.9
+        epsilon: 0.05
+      agent2:
+        policy_infile: ""
+        policy_outfile: "{agent2_outfile}"
+        alpha: 0.2
+        gamma: 0.8
+        epsilon: 0.2
+    """
+    
+        config_file = tmp_path / "test_config.yaml"
+        config_file.write_text(config_content)
+    
+        # Mock argv with the 'train' command and '--config' argument
+        test_args = ["tictactoe", "train", f"--config={config_file}"]
+        monkeypatch.setattr(sys, "argv", test_args)
+    
+        # Run CLI
+>       cli()  # Should now work correctly
+
+tests/test_tictactoe.py:408: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/tictactoe/cli.py:60: in cli
+    train_game(
+src/tictactoe/training.py:30: in train
+    result = play_game(agent1, agent2)
+src/tictactoe/game.py:76: in play_game
+    players[player].learn(state, action, 0, new_state, get_available_moves(new_state))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tictactoe.agents.LearningAgent object at 0x105a15a50>
+state = 'X XOOXX O', action = 7, reward = 0, next_state = 'X XOOXXOO'
+next_available_moves = (1,)
+
+    def learn(
+        self,
+        state: str,
+        action: int,
+        reward: float,
+        next_state: str | None = None,
+        next_available_moves: tuple[int, ...] | None = None,
+    ) -> None:
+        """Update Q-value based on reward and learned value."""
+        old_q = self.get_q_value(state, action)
+        if next_available_moves:
+            future_rewards = []
+            for next_action in next_available_moves:
+                # Simulate the player's next state after the opponent's move
+                simulated_state = list(next_state)
+                simulated_state[next_action] = self.player_type
+                simulated_state = "".join(simulated_state)
+                future_rewards.append(
+>                   max(
+                        self.get_q_value(simulated_state, future_action)
+                        for future_action in get_available_moves(simulated_state)
+                    )
+                )
+E               ValueError: max() arg is an empty sequence
+
+src/tictactoe/agents.py:61: ValueError
+=========================== short test summary info ============================
+FAILED tests/test_tictactoe.py::test_full_game_play - ValueError: max() arg i...
+FAILED tests/test_tictactoe.py::test_train_function - ValueError: max() arg i...
+FAILED tests/test_tictactoe.py::test_train_with_different_episodes - ValueErr...
+FAILED tests/test_tictactoe.py::test_multiple_game_outcomes - ValueError: max...
+FAILED tests/test_tictactoe.py::test_cli_train - ValueError: max() arg is an ...
+========================= 5 failed, 34 passed in 0.11s =========================
