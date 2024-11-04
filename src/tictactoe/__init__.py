@@ -1,6 +1,5 @@
 import random
 import json
-from typing import Optional
 from functools import lru_cache
 
 WIN_CONDITIONS = [
