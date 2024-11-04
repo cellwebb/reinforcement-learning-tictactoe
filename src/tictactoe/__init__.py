@@ -240,6 +240,7 @@ def train(
     single_agent_training: bool = False,
     save_policy: bool = True,
 ) -> None:
+    """Train two agents to play Tic-Tac-Toe against each other."""
 
     if not agent1:
         agent1 = LearningAgent()
