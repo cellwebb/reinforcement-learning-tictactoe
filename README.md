@@ -73,17 +73,28 @@ The game board positions are numbered 0-8, arranged as follows:
 - Win: +1
 - Loss: -1
 - Draw: +0.5
-- Ongoing: 0
+- Intermediate moves: 0
 
 ### Results
 
 TODO: Add chart of win results over n training games.
 
+### Performance Optimizations
+
+- LRU cache for frequently accessed game states
+- Efficient state representation using tuples
+- Cached win condition checking
+- Cached move availability checking
+
 ### Project Structure
 
-- `tictactoe.py`: Main implementation of game environment and learning agents
-- `test_tictactoe.py`: Unit tests
-- `requirements.txt:` Project dependencies
+- `src/tictactoe/`: Main package directory
+  - `__init__.py`: Core implementation of game environment and learning agents
+- `tests/`: Test directory
+  - `test_tictactoe.py`: Comprehensive unit tests
+  - `conftest.py`: Test fixtures
+- `pyproject.toml`: Project configuration and dependencies
+- `README.md`: Project documentation
 - `agent1.json`/`agent2.json`: Saved AI policies (created after training)
 
 ### Classes
@@ -97,6 +108,12 @@ TODO: Add chart of win results over n training games.
 
 ### Running Tests
 
+Tests include full coverage of game logic, agent learning, and human player interaction. Coverage reports are generated automatically when running tests.
+
 ```bash
 python3 -m pytest
 ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
