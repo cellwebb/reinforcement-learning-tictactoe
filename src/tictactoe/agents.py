@@ -13,7 +13,7 @@ class LearningAgent:
         self,
         alpha: float = 0.3,
         gamma: float = 0.95,
-        epsilon: float = 1.0,
+        epsilon: float = 0.3,
         epsilon_decay: float = 0.999,
         win_reward: float = 1.0,
         draw_reward: float = 0.5,
