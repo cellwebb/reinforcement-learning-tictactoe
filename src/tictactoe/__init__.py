@@ -233,10 +233,22 @@ def play_against_ai(
     return result
 
 
-def main():
-    agent1 = LearningAgent()
-    agent2 = LearningAgent()
-    num_episodes = 100
+def train(
+    agent1: LearningAgent = None,
+    agent2: LearningAgent = None,
+    num_episodes: int = 100,
+    single_agent_training: bool = False,
+    save_policy: bool = True,
+) -> None:
+
+    if not agent1:
+        agent1 = LearningAgent()
+
+    if single_agent_training:
+        agent2 = agent1
+    elif not agent2:
+        agent2 = LearningAgent()
+
     results = {"X": 0, "O": 0, "draw": 0}
     wins = {"Agent 1": 0, "Agent 2": 0, "draw": 0}
 
@@ -265,9 +277,11 @@ def main():
     print(f"Results: {results}")
     print(f"Wins: {wins}")
 
-    agent1.save_policy("agent1.json")
-    agent2.save_policy("agent2.json")
+    if save_policy:
+        agent1.save_policy("agent1.json")
+        if not single_agent_training:
+            agent2.save_policy("agent2.json")
 
 
 if __name__ == "__main__":
-    main()
+    train()
