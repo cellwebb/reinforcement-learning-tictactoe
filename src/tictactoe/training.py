@@ -1,4 +1,3 @@
-import time
 from .agents import LearningAgent
 from .game import play_game
 import random
