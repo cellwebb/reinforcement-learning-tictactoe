@@ -166,3 +166,6 @@ agent2.json
 .pytest_results.txt
 src/.DS_Store
 explore_agent1.py
+successive_training.py
+teddy.json
+z.py
