@@ -10,7 +10,6 @@ class LearningAgent:
 
     def __init__(
         self,
-        n_games: int = 100,
         alpha: float = 0.3,
         gamma: float = 0.95,
         epsilon: float = 0.3,
@@ -33,9 +32,6 @@ class LearningAgent:
         self.starting_epsilon = epsilon
         self.min_alpha = min_alpha
         self.min_epsilon = min_epsilon
-
-        self.alpha_decay = pow(self.min_alpha / self.starting_alpha, 1.0 / n_games)
-        self.epsilon_decay = (self.starting_epsilon - self.min_epsilon) / n_games
 
         self.win_reward = win_reward
         self.draw_reward = draw_reward
@@ -106,9 +102,6 @@ class LearningAgent:
             self.update_q_value(state, action, new_q)
 
             i -= 2
-
-        self.alpha *= self.alpha_decay
-        self.epsilon -= self.epsilon_decay
 
     def save_policy(self, filename: str = None) -> None:
         """Save the Q-table to a file."""

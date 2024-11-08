@@ -1,15 +1,6 @@
 from functools import lru_cache
 
-WIN_CONDITIONS = [
-    [0, 1, 2],  # Horizontal
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],  # Vertical
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],  # Diagonal
-    [2, 4, 6],
-]
+from .constants import WIN_CONDITIONS, TRANSFORMATIONS, INVERSE_MAPPINGS
 
 
 @lru_cache(maxsize=19683)  # 3^9 possible board states
@@ -60,29 +51,36 @@ def possible_next_states(state: str, mark: str) -> list[str]:
     ]
 
 
-# Precompute index mappings for transformations
-ROTATE_90 = [6, 3, 0, 7, 4, 1, 8, 5, 2]
-ROTATE_180 = [8, 7, 6, 5, 4, 3, 2, 1, 0]
-ROTATE_270 = [2, 5, 8, 1, 4, 7, 0, 3, 6]
-REFLECT_HORIZONTAL = [2, 1, 0, 5, 4, 3, 8, 7, 6]
+@lru_cache(maxsize=None)
+def apply_transformation(state, mapping):
+    """Apply a transformation mapping to a state."""
+    if mapping is None:
+        return state  # No transformation
+    return "".join(state[mapping[i]] for i in range(9))
 
 
-def apply_transformation(board, mapping):
-    """Apply a precomputed transformation mapping to a board state."""
-    return "".join(board[mapping[i]] for i in range(9))
+@lru_cache(maxsize=None)
+def inverse_transform(move, transformation):
+    """Apply the inverse transformation to a move index."""
+    return INVERSE_MAPPINGS.get(transformation, list(range(9)))[move]
 
 
-@lru_cache(maxsize=None)  # Cache all unique board states
-def get_transformations_with_cache(board):
-    """Generate all rotations and reflections of the board with caching."""
-    transformations = {
-        board,
-        apply_transformation(board, ROTATE_90),
-        apply_transformation(board, ROTATE_180),
-        apply_transformation(board, ROTATE_270),
-        apply_transformation(apply_transformation(board, REFLECT_HORIZONTAL), ROTATE_90),
-        apply_transformation(apply_transformation(board, REFLECT_HORIZONTAL), ROTATE_180),
-        apply_transformation(apply_transformation(board, REFLECT_HORIZONTAL), ROTATE_270),
-        apply_transformation(board, REFLECT_HORIZONTAL),
-    }
-    return transformations
+def find_matching_state_and_transform_back(state, q_table):
+    """
+    Rotate and reflect a state to find a match in the Q-table.
+    If a match is found, return the move suggestions transformed back
+    to the original orientation.
+    """
+    for transformation, mapping in TRANSFORMATIONS:
+        transformed_state = apply_transformation(state, tuple(mapping) if mapping else None)
+        if transformed_state in q_table:
+            # Found a matching state in the Q-table
+            suggested_moves = q_table[transformed_state]
+            # Apply the inverse transformation to suggested moves
+            transformed_moves = [
+                inverse_transform(move, transformation) for move in suggested_moves
+            ]
+            return transformed_moves
+
+    # No match found
+    return None

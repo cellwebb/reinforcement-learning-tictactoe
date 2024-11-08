@@ -7,7 +7,7 @@ from tqdm import tqdm
 def train(
     agent1: LearningAgent = None,
     agent2: LearningAgent = None,
-    num_episodes: int = 100,
+    num_episodes: int = 1000,
     single_agent_training: bool = False,
     agent1_policy_file: str = None,
     agent2_policy_file: str = None,
@@ -23,7 +23,16 @@ def train(
     elif not agent2:
         agent2 = LearningAgent()
 
-    starting_epsilons = (agent1.epsilon, agent2.epsilon)
+    starting_alpha = (agent1.alpha, agent2.alpha)
+    min_alpha = (agent1.min_alpha, agent2.min_alpha)
+    starting_epsilon = (agent1.epsilon, agent2.epsilon)
+    min_epsilon = (agent1.min_epsilon, agent2.min_epsilon)
+
+    alpha_decay = [0, 0]
+    epsilon_decay = [0, 0]
+    for i in range(2):
+        alpha_decay[i] = pow(min_alpha[i] / starting_alpha[i], 1.0 / num_episodes)
+        epsilon_decay[i] = (starting_epsilon[i] - min_epsilon[i]) / num_episodes
 
     results = {"X": 0, "O": 0, "draw": 0}
     wins = {"Agent 1": 0, "Agent 2": 0, "draw": 0}
@@ -50,8 +59,10 @@ def train(
 
         results[result] += 1
 
-        agent1.epsilon = starting_epsilons[0] * i / num_episodes
-        agent2.epsilon = starting_epsilons[1] * i / num_episodes
+        agent1.alpha = max(agent1.min_alpha, agent1.alpha * alpha_decay[0])
+        agent2.alpha = max(agent2.min_alpha, agent2.alpha * alpha_decay[1])
+        agent1.epsilon = max(agent1.min_epsilon, agent1.epsilon - epsilon_decay[0])
+        agent2.epsilon = max(agent2.min_epsilon, agent2.epsilon - epsilon_decay[1])
 
     print(f"Results: {results}")
     if not single_agent_training:
