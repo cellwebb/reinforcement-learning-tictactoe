@@ -1,19 +1,21 @@
-num_episodes: 100000
+num_episodes: 1000
 
 single_agent_training: false  # If true, only agent1 will be trained
 
-# If policy_infile is not empty, the agent will load the Q-table from the file
-# If policy_outfile is not empty, the agent will save the Q-table to the file
 agents:
   agent1:
     policy_infile: ""
     policy_outfile: "agent1.json"
-    alpha: 0.3
-    gamma: 0.9
-    epsilon: 0.1
+    alpha: 0.3  # Learning rate
+    gamma: 0.99  # Discount factor
+    epsilon: 0.1  # Exploration rate
+    epsilon_decay: 0.9999
+    epsilon_decay_method: "exponential"  # "exponential" or "linear"
   agent2:
-    policy_infile: ""
+    policy_infile: "agent1.json"
     policy_outfile: "agent2.json"
-    alpha: 0.2
-    gamma: 0.8
-    epsilon: 0.2
+    alpha: 0.05
+    gamma: 0.90
+    epsilon: 0.05
+    epsilon_decay: 0.9999
+    epsilon_decay_method: "exponential"
