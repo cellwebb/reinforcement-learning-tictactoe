@@ -165,5 +165,4 @@ agent1.json
 agent2.json
 .pytest_results.txt
 src/.DS_Store
-config.yaml
 explore_agent1.py

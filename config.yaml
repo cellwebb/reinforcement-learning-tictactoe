@@ -1,4 +1,4 @@
-num_episodes: 1000
+num_episodes: 10000
 
 single_agent_training: false  # If true, only agent1 will be trained
 
@@ -6,9 +6,9 @@ agents:
   agent1:
     policy_infile: ""
     policy_outfile: "agent1.json"
-    alpha: 0.3  # Learning rate
-    gamma: 0.99  # Discount factor
-    epsilon: 0.1  # Exploration rate
+    alpha: 0.3
+    gamma: 0.99
+    epsilon: 0.1
     epsilon_decay: 0.9999
     epsilon_decay_method: "exponential"  # "exponential" or "linear"
   agent2:
