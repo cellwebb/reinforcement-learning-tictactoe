@@ -40,26 +40,14 @@ def cli():
 
             pprint(config)
 
-        # Initialize Agent 1
-        agent1 = LearningAgent(
-            alpha=agent1_config.get("alpha", 0.1),
-            gamma=agent1_config.get("gamma", 0.9),
-            epsilon=agent1_config.get("epsilon", 0.1),
-            policy_infile=agent1_config.get("policy_infile"),
-            policy_outfile=agent1_config.get("policy_outfile"),
-        )
-
-        # Initialize Agent 2
-        if single_agent_training:
-            agent2 = agent1
+            agent1 = LearningAgent(**agent1_config)
+            if single_agent_training:
+                agent2 = agent1
+            else:
+                agent2 = LearningAgent(**agent2_config)
         else:
-            agent2 = LearningAgent(
-                alpha=agent2_config.get("alpha", 0.1),
-                gamma=agent2_config.get("gamma", 0.9),
-                epsilon=agent2_config.get("epsilon", 0.1),
-                policy_infile=agent2_config.get("policy_infile"),
-                policy_outfile=agent2_config.get("policy_outfile"),
-            )
+            agent1 = LearningAgent()
+            agent2 = LearningAgent()
 
         # Start Training
         train_game(

@@ -58,3 +58,31 @@ def possible_next_states(state: str, mark: str) -> list[str]:
         )
         for action in get_available_moves(state)
     ]
+
+
+# Precompute index mappings for transformations
+ROTATE_90 = [6, 3, 0, 7, 4, 1, 8, 5, 2]
+ROTATE_180 = [8, 7, 6, 5, 4, 3, 2, 1, 0]
+ROTATE_270 = [2, 5, 8, 1, 4, 7, 0, 3, 6]
+REFLECT_HORIZONTAL = [2, 1, 0, 5, 4, 3, 8, 7, 6]
+
+
+def apply_transformation(board, mapping):
+    """Apply a precomputed transformation mapping to a board state."""
+    return "".join(board[mapping[i]] for i in range(9))
+
+
+@lru_cache(maxsize=None)  # Cache all unique board states
+def get_transformations_with_cache(board):
+    """Generate all rotations and reflections of the board with caching."""
+    transformations = {
+        board,
+        apply_transformation(board, ROTATE_90),
+        apply_transformation(board, ROTATE_180),
+        apply_transformation(board, ROTATE_270),
+        apply_transformation(apply_transformation(board, REFLECT_HORIZONTAL), ROTATE_90),
+        apply_transformation(apply_transformation(board, REFLECT_HORIZONTAL), ROTATE_180),
+        apply_transformation(apply_transformation(board, REFLECT_HORIZONTAL), ROTATE_270),
+        apply_transformation(board, REFLECT_HORIZONTAL),
+    }
+    return transformations

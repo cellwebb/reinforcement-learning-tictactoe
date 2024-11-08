@@ -9,13 +9,13 @@ agents:
     alpha: 0.3
     gamma: 0.99
     epsilon: 0.1
-    epsilon_decay: 0.9999
-    epsilon_decay_method: "exponential"  # "exponential" or "linear"
+    min_alpha: 0.01
+    min_epsilon: 0.01
   agent2:
     policy_infile: "agent1.json"
     policy_outfile: "agent2.json"
     alpha: 0.05
     gamma: 0.90
     epsilon: 0.05
-    epsilon_decay: 0.9999
-    epsilon_decay_method: "exponential"
+    min_alpha: 0.01
+    min_epsilon: 0.01

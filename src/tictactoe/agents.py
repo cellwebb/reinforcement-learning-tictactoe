@@ -1,6 +1,5 @@
 import random
 import json
-from pprint import pprint
 from functools import lru_cache
 from itertools import permutations
 from .utils import get_available_moves
@@ -11,25 +10,37 @@ class LearningAgent:
 
     def __init__(
         self,
+        n_games: int = 100,
         alpha: float = 0.3,
         gamma: float = 0.95,
         epsilon: float = 0.3,
-        epsilon_decay: float = 0.999,
+        min_alpha: float = 0.01,
+        min_epsilon: float = 0.01,
         win_reward: float = 1.0,
         draw_reward: float = 0.5,
         loss_reward: float = -1.0,
+        block_reward: float = 0.5,
         starting_q_value: float = 0.0,
         policy_infile: str = None,
         policy_outfile: str = None,
     ):
+
         self.alpha = alpha  # learning rate
         self.gamma = gamma  # discount factor
         self.epsilon = epsilon  # exploration rate
-        self.epsilon_decay = epsilon_decay
+
+        self.starting_alpha = alpha
+        self.starting_epsilon = epsilon
+        self.min_alpha = min_alpha
+        self.min_epsilon = min_epsilon
+
+        self.alpha_decay = pow(self.min_alpha / self.starting_alpha, 1.0 / n_games)
+        self.epsilon_decay = (self.starting_epsilon - self.min_epsilon) / n_games
 
         self.win_reward = win_reward
         self.draw_reward = draw_reward
         self.loss_reward = loss_reward
+        self.block_reward = block_reward
 
         self.starting_q_value = starting_q_value
 
@@ -79,11 +90,6 @@ class LearningAgent:
         state = state_history[i]
         action = move_history[i]
 
-        pprint(f"result: {result}, turns: {turns}, ")
-        pprint(f"player_mark: {player_mark}, reward: {reward}")
-        pprint(f"i: {i}, state: {state:}, action: {action}")
-        pprint(state_history)
-
         current_q = self.get_q_value(state, action)
         new_q = current_q + self.alpha * (reward - current_q)
         self.update_q_value(state, action, new_q)
@@ -101,7 +107,8 @@ class LearningAgent:
 
             i -= 2
 
-        # self.epsilon *= self.epsilon_decay
+        self.alpha *= self.alpha_decay
+        self.epsilon -= self.epsilon_decay
 
     def save_policy(self, filename: str = None) -> None:
         """Save the Q-table to a file."""
@@ -170,7 +177,8 @@ class HumanPlayer:
             except ValueError:
                 print("Please enter an available move")
 
-    def learn(
-        self, result: str, state_history: list[str], move_history: list[int], first_player: bool
-    ):
+    def learn(self, *args, **kwargs):
+        pass
+
+    def apply_decay(self, *args, **kwargs):
         pass

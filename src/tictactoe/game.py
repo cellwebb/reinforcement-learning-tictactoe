@@ -1,4 +1,3 @@
-from pprint import pprint
 from .utils import get_available_moves, is_winner, is_draw
 from .agents import LearningAgent, HumanPlayer
 
@@ -63,7 +62,6 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
             for mark in ["X", "O"]:
                 first_player = mark == player_mark
                 players[mark].learn(result, env.state_history, env.move_history, first_player)
-
             break
 
         if is_draw(new_state):
@@ -71,7 +69,6 @@ def play_game(player1: LearningAgent | HumanPlayer, player2: LearningAgent | Hum
             for mark in ["X", "O"]:
                 first_player = mark == player_mark
                 players[mark].learn(result, env.state_history, env.move_history, first_player)
-
             break
 
     return result
