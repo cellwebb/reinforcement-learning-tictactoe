@@ -487,29 +487,27 @@ def test_possible_next_states(state, mark, expected):
     assert possible_next_states(state, mark) == expected
 
 
-@pytest.mark.parametrize(
-    "move,transformation,expected",
-    [
-        (0, "rotate_90", 6),
-        (1, "rotate_180", 7),
-        (2, "rotate_270", 0),
-    ],
-)
-def test_inverse_transform(move, transformation, expected):
-    """Test inverse transformation of a move index."""
-    assert inverse_transform(move, transformation) == expected
-
-
-def test_find_matching_state_and_transform_back():
-    """Test finding matching state and transforming back."""
-    q_table = {
-        "X        ": [0, 1, 2],
-        "XOX        ": [3, 4, 5],
-    }
-    state = "  X      "
-    expected = [0, 1, 2]
-    assert find_matching_state_and_transform_back(state, q_table) == expected
-
-    state = "      XOX"
-    expected = [3, 4, 5]
-    assert find_matching_state_and_transform_back(state, q_table) == expected
+def test_TRANSFORMATIONS():
+    """Test the TRANSFORMATIONS constant."""
+    assert len(TRANSFORMATIONS) == 8
+    assert all(len(t) == 3 for t in TRANSFORMATIONS)
+    for name, forward, backward in TRANSFORMATIONS:
+        assert name in [
+            "original",
+            "rotate_90",
+            "rotate_180",
+            "rotate_270",
+            "reflect_horizontal",
+            "reflect_horizontal_rotate_90",
+            "reflect_horizontal_rotate_180",
+            "reflect_horizontal_rotate_270",
+        ]
+        assert len(forward) == 9
+        assert len(backward) == 9
+        assert len(set(forward)) == 9
+        assert len(set(backward)) == 9
+        assert all(0 <= i < 9 for i in forward)
+        assert all(0 <= i < 9 for i in backward)
+        for i in range(9):
+            assert forward[i] == backward.index(i), f"Error in {name}, {i}, {forward}, {backward}"
+            assert backward[i] == forward.index(i), f"Error in {name}, {i}, {forward}, {backward}"
