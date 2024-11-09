@@ -14,6 +14,16 @@ from tictactoe import (
 )
 import itertools  # Add this import
 
+from tictactoe.utils import (
+    opponent_wins_next_turn,
+    opponent_can_draw,
+    possible_next_states,
+    apply_transformation,
+    inverse_transform,
+    find_matching_state_and_transform_back,
+)
+from tictactoe.constants import TRANSFORMATIONS
+
 
 def test_initial_state(game):
     """Test that the game board is initialized correctly."""
@@ -412,3 +422,94 @@ def test_cli_play_valid(tmp_path, random_move_generator):
     with patch("builtins.input", side_effect=random_move_generator), patch("builtins.print"):
         with patch.object(sys, "argv", ["tictactoe", "play", f"--policy={policy_file}"]):
             cli()  # Should now work correctly
+
+
+@pytest.mark.parametrize(
+    "state,player,expected",
+    [
+        ("XX       ", "O", True),  # Opponent can win next turn
+        ("XOXOXOXOX", "O", False),  # Opponent cannot win next turn
+    ],
+)
+def test_opponent_wins_next_turn(state, player, expected):
+    """Test if opponent can win in the next move."""
+    assert opponent_wins_next_turn(state, player) == expected
+
+
+@pytest.mark.parametrize(
+    "state,expected",
+    [
+        ("XOXOXOXOX", False),  # Opponent cannot force a draw
+        ("XOXOXO   ", True),  # Opponent can force a draw
+    ],
+)
+def test_opponent_can_draw(state, expected):
+    """Test if opponent can force a draw."""
+    assert opponent_can_draw(state) == expected
+
+
+@pytest.mark.parametrize(
+    "state,mark,expected",
+    [
+        (
+            "         ",
+            "X",
+            [
+                "X        ",
+                " X       ",
+                "  X      ",
+                "   X     ",
+                "    X    ",
+                "     X   ",
+                "      X  ",
+                "       X ",
+                "        X",
+            ],
+        ),
+        (
+            "X        ",
+            "O",
+            [
+                "XO       ",
+                "X O      ",
+                "X  O     ",
+                "X   O    ",
+                "X    O   ",
+                "X     O  ",
+                "X      O ",
+                "X       O",
+            ],
+        ),
+    ],
+)
+def test_possible_next_states(state, mark, expected):
+    """Test possible next states for a given state."""
+    assert possible_next_states(state, mark) == expected
+
+
+@pytest.mark.parametrize(
+    "move,transformation,expected",
+    [
+        (0, "rotate_90", 6),
+        (1, "rotate_180", 7),
+        (2, "rotate_270", 0),
+    ],
+)
+def test_inverse_transform(move, transformation, expected):
+    """Test inverse transformation of a move index."""
+    assert inverse_transform(move, transformation) == expected
+
+
+def test_find_matching_state_and_transform_back():
+    """Test finding matching state and transforming back."""
+    q_table = {
+        "X        ": [0, 1, 2],
+        "XOX        ": [3, 4, 5],
+    }
+    state = "  X      "
+    expected = [0, 1, 2]
+    assert find_matching_state_and_transform_back(state, q_table) == expected
+
+    state = "      XOX"
+    expected = [3, 4, 5]
+    assert find_matching_state_and_transform_back(state, q_table) == expected

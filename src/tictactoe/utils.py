@@ -36,36 +36,47 @@ def opponent_wins_next_turn(state: str, player_mark: str) -> bool:
 @lru_cache(maxsize=19683)
 def opponent_can_draw(state: str) -> bool:
     """Check if the opponent can force a draw."""
-    return state.count(" ") == 1
+    opponent_mark = "O" if state.count("X") > state.count("O") else "X"
+    for move in get_available_moves(state):
+        simulated_state = list(state)
+        simulated_state[move] = opponent_mark
+        simulated_state = "".join(simulated_state)
+        if is_draw(simulated_state) or not any(
+            is_winner(simulated_state, mark) for mark in ["X", "O"]
+        ):
+            return True
+    return False
 
 
 @lru_cache(maxsize=19683)
 def possible_next_states(state: str, mark: str) -> list[str]:
     """Get all possible next states for a given state."""
-    return [
-        "".join(
-            state[:action] + mark + state[action + 1 :] if mark == " " else mark
-            for action, mark in enumerate(state)
-        )
-        for action in get_available_moves(state)
-    ]
+    return [state[:action] + mark + state[action + 1 :] for action in get_available_moves(state)]
 
 
 @lru_cache(maxsize=None)
-def apply_transformation(state, mapping):
+def apply_transformation(state: str, mapping: tuple[int] | None) -> str:
     """Apply a transformation mapping to a state."""
     if mapping is None:
-        return state  # No transformation
+        return state
     return "".join(state[mapping[i]] for i in range(9))
 
 
 @lru_cache(maxsize=None)
-def inverse_transform(move, transformation):
+def get_equivalent_states(state: str) -> list[tuple[str]]:
+    """Get all equivalent states for a given state."""
+    return [
+        (map_title, apply_transformation(state, mapping)) for map_title, mapping in TRANSFORMATIONS
+    ]
+
+
+@lru_cache(maxsize=None)
+def inverse_transform(move: int, transformation: str) -> int:
     """Apply the inverse transformation to a move index."""
     return INVERSE_MAPPINGS.get(transformation, list(range(9)))[move]
 
 
-def find_matching_state_and_transform_back(state, q_table):
+def find_matching_state_and_transform_back(state: str, q_table: dict) -> list[int] | None:
     """
     Rotate and reflect a state to find a match in the Q-table.
     If a match is found, return the move suggestions transformed back
